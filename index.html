@@ -251,33 +251,84 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
   <div class="w-body"><div class="cyc-layout"><svg id="cycSvg" width="260" height="260" viewBox="0 0 260 260"></svg><div class="cyc-info"><span class="cyc-r">$r = 4$</span><div class="cyc-desc">The values cycle through $\{1, 7, 4, 13\}$ forever. This is the signal the quantum Fourier transform will detect.</div></div></div></div>
 </div>
 
+<div class="review rv" id="r6">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">In our worked example, what is the period of $7^x \bmod 15$?</div>
+    <div class="review-opts" id="r6o">
+      <button class="r-btn" onclick="ck('r6',this,0)">$r = 2$</button>
+      <button class="r-btn" onclick="ck('r6',this,1)">$r = 4$</button>
+      <button class="r-btn" onclick="ck('r6',this,0)">$r = 7$</button>
+    </div><div class="r-exp" id="r6e"></div>
+  </div>
+</div>
+
 <h2 id="s-quantum">Where the quantum computer comes in</h2>
 <p>At this point you might be wondering: we just found the period by computing a table. Why on earth do we need a quantum computer?</p>
 <p>The answer is scale. For $N = 15$, the period is $4$, and we only needed to evaluate four values to find it. But for a number with 600 digits, the period could be comparably enormous. A classical computer would need to evaluate a staggering number of modular exponentiations, one after another, to find where the pattern repeats. No classical shortcut is known.</p>
-<p>A quantum computer approaches this problem in a fundamentally different way. Rather than computing $a^x \bmod N$ for each value of $x$ one at a time, it places all possible values of $x$ into <em>superposition</em> and evaluates the function for all of them at once. Then it applies the Quantum Fourier Transform, which extracts the period from the interference pattern that results.</p>
-<p>That probably sounds like magic. To make it more concrete, step through each stage of the quantum circuit below:</p>
+<p>Here's the crucial subtlety, though. A quantum computer can't just "try all divisors in parallel" and magically pick the right one. That's a common misconception. If you put all possible values into superposition and then measured, you'd just get a random value, which is useless. What a quantum computer <em>can</em> do is detect a <strong>global property</strong> of the entire sequence: its period. The period isn't hiding in any single value. It's a pattern that only emerges from looking at all the values together. And that's exactly the kind of structure quantum interference can extract.</p>
+<p>To understand how, we need to introduce a few ideas from quantum mechanics. Don't worry if these are new to you. We'll build up the intuition step by step.</p>
+
+<h3>A brief guide to quantum notation</h3>
+<p>In quantum computing, we use a notation called <em>ket notation</em>. When you see something like $|5\rangle$, it just means "the quantum state representing the number 5." The vertical bar and angle bracket are just a label. You can think of $|x\rangle$ as a box with the number $x$ written on it.</p>
+<p>A classical computer stores a definite value: a register might hold the number 5. A quantum register can be in a <strong>superposition</strong> of many values at once. This is often written as $|0\rangle + |1\rangle + |2\rangle + \ldots$, meaning the register is simultaneously in all of those states. When you measure a register in superposition, you get one of those values at random, and the superposition collapses.</p>
+<p>Two more ideas will be important. <strong>Interference</strong> is what happens when quantum states combine. Just like sound waves, quantum amplitudes can reinforce each other (constructive interference, making an outcome more likely) or cancel each other out (destructive interference, making it less likely). And <strong>entanglement</strong> is a correlation between two quantum registers: measuring one can instantly affect what you'd see if you measured the other.</p>
+<p>With that vocabulary in hand, here's how the quantum part of Shor's algorithm works. Rather than computing $a^x \bmod N$ for each value of $x$ one at a time, the quantum computer places all possible values of $x$ into superposition and evaluates the function for all of them at once. Then it applies the Quantum Fourier Transform (QFT), which uses interference to extract the period from the pattern.</p>
+<p>Step through each stage below:</p>
 <div class="widget rv">
   <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Step-through: The quantum subroutine</span></div>
   <div class="w-body"><div class="tabs" id="qTabs"></div><div id="qBody" class="tab-body"></div></div>
 </div>
 
+<div class="review rv" id="r7">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">What does "superposition" mean in the context of the quantum subroutine?</div>
+    <div class="review-opts" id="r7o">
+      <button class="r-btn" onclick="ck('r7',this,0)">The quantum computer tries each value of $x$ in sequence, very quickly</button>
+      <button class="r-btn" onclick="ck('r7',this,1)">The quantum register holds all possible values of $x$ simultaneously</button>
+      <button class="r-btn" onclick="ck('r7',this,0)">The quantum computer guesses the correct value of $x$ randomly</button>
+    </div><div class="r-exp" id="r7e"></div>
+  </div>
+</div>
+
 <h2 id="s-phase">Deeper look: phase estimation and the multiplication operator</h2>
 
-<p>If you want to understand not just <em>that</em> the quantum circuit works, but <em>why</em> it works, the key is to see Shor's algorithm as an instance of a more general protocol called <strong>quantum phase estimation</strong>.</p>
+<p>The previous section described <em>what</em> the quantum circuit does: superposition, modular exponentiation, QFT, measurement. But it may have felt like a recipe without an explanation. Why does the QFT extract the period? What's really going on?</p>
 
-<p>Consider the operation "multiply by $a$, modulo $N$." We can define this as a quantum operator $M_a$ that acts on basis states as $M_a|x\rangle = |ax \bmod N\rangle$. This operator is unitary: it simply shuffles the basis states around. For $N = 15$ and $a = 2$, it maps $|1\rangle \to |2\rangle \to |4\rangle \to |8\rangle \to |1\rangle$, cycling with period $r = 4$.</p>
+<p>This section goes one level deeper. If you're comfortable with the recipe and want to move on, feel free to skip ahead to the next section. But if you want to understand the mechanism, read on.</p>
 
-<p>Now here is the critical observation. This operator $M_a$ has eigenvectors $|\psi_j\rangle$ with eigenvalues $e^{2\pi i j/r}$ for $j = 0, 1, \ldots, r-1$. If we could somehow prepare one of these eigenvectors and feed it into a phase estimation circuit, we would directly measure the phase $\theta = j/r$ and read off $r$ from the denominator.</p>
+<p>Consider the operation "multiply by $a$, modulo $N$." In quantum computing, we can build a gate that performs this operation on a quantum state. We write it as $M_a$, and it acts like this: if you feed it a state $|x\rangle$ (remember, that's just "the state representing the number $x$"), it outputs $|ax \bmod N\rangle$. In other words, it multiplies by $a$ and takes the remainder.</p>
 
-<p>But preparing the eigenvectors requires knowing $r$ in advance, which is the thing we are trying to find. The elegant solution: prepare the state $|1\rangle$ instead. It turns out that $|1\rangle$ is the <em>uniform superposition</em> of all the eigenvectors:</p>
+<p>For $N = 15$ and $a = 2$, this gate maps $|1\rangle \to |2\rangle \to |4\rangle \to |8\rangle \to |1\rangle$, cycling with period $r = 4$. Notice it's doing the same modular exponentiation we computed by hand earlier, but now as a quantum operation.</p>
+
+<p>Here's the key mathematical insight. This operator $M_a$ has special states called <em>eigenvectors</em>. You can think of an eigenvector as a state that $M_a$ doesn't really change. It just picks up a phase factor (a complex number of magnitude 1). The phase factors are $e^{2\pi i j/r}$ for $j = 0, 1, \ldots, r-1$. Notice that the period $r$ appears directly in these phase factors. If we could measure one of these phases, we could read off $r$.</p>
+
+<p>That's exactly what the quantum phase estimation circuit does: it measures the phase of an eigenvector. But there's a catch. To prepare an eigenvector of $M_a$, you'd need to already know $r$, which is the thing we're trying to find.</p>
+
+<p>The elegant workaround: prepare the state $|1\rangle$ instead. It turns out that $|1\rangle$ is the uniform superposition of all the eigenvectors:</p>
 
 <div class="math-block">$$|1\rangle = \frac{1}{\sqrt{r}} \sum_{k=0}^{r-1} |\psi_k\rangle$$</div>
 
-<p>This means the phase estimation circuit, when given $|1\rangle$, will measure a random $k/r$ for some $k \in \{0, 1, \ldots, r-1\}$. From the denominator of this fraction, we recover $r$.</p>
+<p>So the circuit will measure the phase of a random eigenvector, giving us $k/r$ for some random $k$. From the denominator, we get $r$.</p>
+
+<div class="review rv" id="r8">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">Why can we use the state $|1\rangle$ instead of preparing a specific eigenvector of $M_a$?</div>
+    <div class="review-opts" id="r8o">
+      <button class="r-btn" onclick="ck('r8',this,0)">Because $|1\rangle$ is itself an eigenvector of $M_a$</button>
+      <button class="r-btn" onclick="ck('r8',this,1)">Because $|1\rangle$ is a superposition of all the eigenvectors, so the circuit measures one at random</button>
+      <button class="r-btn" onclick="ck('r8',this,0)">Because $|1\rangle$ always gives the correct period directly</button>
+    </div><div class="r-exp" id="r8e"></div>
+  </div>
+</div>
 
 <h3>From measurement to period: the continued fractions table</h3>
 
-<p>In practice, the circuit uses $m$ qubits for measurement precision. For $N = 15$ with 8 measurement qubits, $Q = 2^8 = 256$. The measurement returns an integer that, divided by $Q$, approximates $k/r$. Here is the full table of possible outcomes for $a = 2$, $r = 4$:</p>
+<p>In practice, the circuit doesn't measure the phase $k/r$ exactly. It uses $m$ qubits for precision, giving a register of size $Q = 2^m$. The measurement returns an integer $y$ that approximates $k \cdot Q / r$. To recover $r$, we divide $y$ by $Q$ and find the fraction with the smallest denominator that's close to $y/Q$. This is the <em>continued fractions algorithm</em>, a classical technique for finding the "simplest" fraction near a given decimal.</p>
+
+<p>For $N = 15$ with 8 measurement qubits, $Q = 2^8 = 256$. Here is the full table of possible outcomes for $a = 2$, $r = 4$:</p>
 
 <div class="widget rv">
   <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Measurement outcomes and period extraction</span></div>
@@ -471,8 +522,8 @@ function updateSidebar(){
 window.addEventListener('scroll',updateSidebar,{passive:true});
 updateSidebar();
 
-const A={r1:{y:"Correct. Shor's central insight is to convert factoring into finding the period of a modular exponential function.",n:"The key reduction is factoring to period-finding: detecting how quickly a^x mod N repeats."},r2:{y:"Exactly. The formula uses a^(r/2). Since r = 4, r/2 = 2, so we compute 7² = 49, then gcd(49 ± 1, 15).",n:"The formula requires a^(r/2). With r = 4, that gives 7² = 49."},r3:{y:"Right. Constructive interference at multiples of Q/r, destructive interference elsewhere.",n:"The spikes come from quantum interference: amplitudes reinforce at multiples of Q/r and cancel everywhere else."},r4:{y:"Correct. Only the period-finding step needs quantum resources. Everything else is classical.",n:"Only quantum Fourier sampling requires a quantum computer. Choosing a and computing gcd are classical."},r5:{y:"Correct. RSA's entire security rests on the difficulty of factoring. Shor's algorithm solves exactly that problem in polynomial time.",n:"Shor's algorithm does not try all keys. It specifically exploits the fact that RSA depends on factoring being hard. By factoring N = p × q efficiently, it recovers the private key."}};
-function ck(id,b,ok){const os=document.querySelectorAll('#'+id+'o .r-btn');os.forEach(x=>{x.classList.add('off');if(x===b)x.classList.add(ok?'right':'wrong')});if(!ok)os.forEach((x,i)=>{if(x!==b){const c=(id==='r1'&&i===1)||(id==='r2'&&i===1)||(id==='r3'&&i===1)||(id==='r4'&&i===1)||(id==='r5'&&i===1);if(c)x.classList.add('right')}});const e=document.getElementById(id+'e');e.textContent=ok?A[id].y:A[id].n;e.className='r-exp show '+(ok?'y':'n')}
+const A={r1:{y:"Correct. Shor's central insight is to convert factoring into finding the period of a modular exponential function.",n:"The key reduction is factoring to period-finding: detecting how quickly a^x mod N repeats."},r2:{y:"Exactly. The formula uses a^(r/2). Since r = 4, r/2 = 2, so we compute 7² = 49, then gcd(49 ± 1, 15).",n:"The formula requires a^(r/2). With r = 4, that gives 7² = 49."},r3:{y:"Right. Constructive interference at multiples of Q/r, destructive interference elsewhere.",n:"The spikes come from quantum interference: amplitudes reinforce at multiples of Q/r and cancel everywhere else."},r4:{y:"Correct. Only the period-finding step needs quantum resources. Everything else is classical.",n:"Only quantum Fourier sampling requires a quantum computer. Choosing a and computing gcd are classical."},r5:{y:"Correct. RSA's entire security rests on the difficulty of factoring. Shor's algorithm solves exactly that problem in polynomial time.",n:"Shor's algorithm does not try all keys. It specifically exploits the fact that RSA depends on factoring being hard. By factoring N = p × q efficiently, it recovers the private key."},r6:{y:"Correct. The sequence 1, 7, 4, 13 repeats every 4 steps, so r = 4.",n:"Look at the table again: the values go 1, 7, 4, 13, 1, 7, 4, 13... The pattern repeats every 4 steps."},r7:{y:"Correct. Superposition means the register holds all values simultaneously, not one at a time. That's why a quantum computer can evaluate the function for all inputs in a single step.",n:"Superposition isn't about speed or guessing. It means the register genuinely holds all possible values at the same time. Measurement then collapses it to one."},r8:{y:"Correct. |1⟩ happens to be a uniform mix of all the eigenvectors, so the circuit measures the phase of a random one, which still reveals r.",n:"|1⟩ is not an eigenvector itself. But it is a superposition of all the eigenvectors, so the phase estimation circuit measures a random eigenvector's phase, giving k/r for random k."}};
+function ck(id,b,ok){const os=document.querySelectorAll('#'+id+'o .r-btn');os.forEach(x=>{x.classList.add('off');if(x===b)x.classList.add(ok?'right':'wrong')});if(!ok)os.forEach((x,i)=>{if(x!==b){const correctIdx={r1:1,r2:1,r3:1,r4:1,r5:1,r6:1,r7:1,r8:1};if(i===correctIdx[id])x.classList.add('right')}});const e=document.getElementById(id+'e');e.textContent=ok?A[id].y:A[id].n;e.className='r-exp show '+(ok?'y':'n')}
 
 let mi=0;const md=[{x:0,p:'1',m:1},{x:1,p:'7',m:7},{x:2,p:'49',m:4},{x:3,p:'343',m:13},{x:4,p:'2,\\!401',m:1},{x:5,p:'16,\\!807',m:7},{x:6,p:'117,\\!649',m:4},{x:7,p:'823,\\!543',m:13},{x:8,p:'5,\\!764,\\!801',m:1}];
 function addR(){if(mi>=md.length)return;const d=md[mi],t=document.querySelector('#mt tbody'),r=document.createElement('tr');r.className='nw';const h=d.x>0&&d.m===1;r.innerHTML='<td>'+d.x+'</td><td>$'+d.p+'$</td><td class="'+(h?'hl':'')+'">'+d.m+'</td><td class="an">'+(h?'← repeats!':'')+'</td>';t.appendChild(r);mi++;renderMathInElement(r,{delimiters:[{left:'$',right:'$',display:false}],throwOnError:false});if(mi===5){document.getElementById('hint').innerHTML='The value <strong>returned to 1</strong>. The pattern repeats!';document.getElementById('hint').style.color='var(--purple)'}if(mi>=md.length){document.getElementById('addB').style.display='none';const f=document.getElementById('mFoot');f.textContent='Period r = 4. The sequence {1, 7, 4, 13} repeats forever.';f.style.color='var(--purple)';f.style.fontStyle='normal';f.style.fontWeight='600'}}
@@ -494,10 +545,10 @@ h+='<text x="'+x+'" y="'+(y+1)+'" text-anchor="middle" dominant-baseline="centra
 });svg.innerHTML=h})();
 
 ;(function(){const S=[
-{t:'1. Superposition',h:'<p>Prepare two quantum registers. Apply Hadamard gates to put the first into an equal superposition of all exponent values:</p><div class="math-block">$$|\\psi\\rangle = \\frac{1}{\\sqrt{Q}} \\sum_{x=0}^{Q-1} |x\\rangle|0\\rangle$$</div><p>For $Q = 16$, all sixteen values of $x$ exist simultaneously in the quantum state.</p>'},
-{t:'2. Mod exp',h:'<p>Apply a unitary gate that computes $f(x) = 7^x \\bmod 15$ and stores it in the second register:</p><div class="math-block">$$|\\psi\\rangle \\to \\frac{1}{\\sqrt{Q}} \\sum_{x=0}^{Q-1} |x\\rangle|7^x \\bmod 15\\rangle$$</div><p>One quantum operation evaluates the function for <strong>all 16 inputs simultaneously</strong>.</p>'},
-{t:'3. QFT',h:'<p>The <strong>Quantum Fourier Transform</strong> converts the periodic pattern in the amplitudes into sharp frequency peaks, just as a prism splits light into its component wavelengths.</p><div class="math-block">$$\\text{QFT detects: "this signal repeats every } r = 4 \\text{ steps"}$$</div><p>At multiples of $Q/r$, amplitudes <strong>constructively interfere</strong> (add up). Everywhere else, they <strong>destructively interfere</strong> (cancel to near zero).</p>'},
-{t:'4. Measure',h:'<p>Measure the first register. The interference pattern ensures you get a "spike" value with high probability:</p><div class="math-block">$$m = 4 \\implies \\frac{4}{16} = \\frac{1}{4} \\implies r = 4 \\;\\checkmark$$$$m = 12 \\implies \\frac{12}{16} = \\frac{3}{4} \\implies r = 4 \\;\\checkmark$$</div><p>The continued fractions algorithm extracts $r$ from $m/Q$. A handful of measurements determine $r$ with near certainty.</p>'}
+{t:'1. Superposition',h:'<p>The first step is to prepare a quantum register that holds <strong>all possible values of $x$ at once</strong>. This is done with quantum gates called Hadamard gates, which take each qubit from a definite 0 into a 50/50 mix of 0 and 1.</p><p>The result is a register simultaneously in every state from $|0\\rangle$ to $|Q-1\\rangle$:</p><div class="math-block">$$\\frac{1}{\\sqrt{Q}} \\sum_{x=0}^{Q-1} |x\\rangle|0\\rangle$$</div><p>For $Q = 16$, all sixteen values of $x$ exist in the register at the same time. A second register, initialized to $|0\\rangle$, waits to store the function output.</p>'},
+{t:'2. Modular exponentiation',h:'<p>Now the quantum computer computes $7^x \\bmod 15$ for <strong>every value of $x$ simultaneously</strong>. A single quantum operation transforms the state:</p><div class="math-block">$$\\frac{1}{\\sqrt{Q}} \\sum_{x=0}^{Q-1} |x\\rangle|7^x \\bmod 15\\rangle$$</div><p>A classical computer would compute this 16 times, once per $x$. The quantum computer does it in one step because the register is in superposition. The second register now contains the output for each input, entangled with the first.</p>'},
+{t:'3. Quantum Fourier Transform',h:'<p>The QFT is the heart of the algorithm. Think of it like a prism splitting white light into a rainbow: it takes a complex signal and reveals the frequencies hidden inside.</p><p>The periodic pattern (the function repeats every $r = 4$ steps) creates a specific frequency. The QFT converts this into sharp peaks at multiples of $Q/r$:</p><div class="math-block">$$\\text{Peaks at } 0, \\; Q/r, \\; 2Q/r, \\; 3Q/r, \\; \\ldots$$</div><p>At these positions, quantum amplitudes <strong>add up</strong> (constructive interference). Everywhere else, they <strong>cancel out</strong> (destructive interference). Same physics that makes a diffraction grating produce bright and dark bands.</p>'},
+{t:'4. Measurement',h:'<p>When you measure, the interference pattern guarantees you land on a spike with very high probability. The measured value $m$ is a multiple of $Q/r$:</p><div class="math-block">$$m = 4 \\implies \\frac{4}{16} = \\frac{1}{4} \\implies r = 4 \\;\\checkmark$$$$m = 12 \\implies \\frac{12}{16} = \\frac{3}{4} \\implies r = 4 \\;\\checkmark$$</div><p>To extract $r$ from $m/Q$, we use the continued fractions algorithm: a classical technique that finds the simplest fraction close to a given decimal. A handful of independent measurements determine $r$ with near certainty.</p>'}
 ];let c=0;function R(){const T=document.getElementById('qTabs'),B=document.getElementById('qBody');T.innerHTML='';S.forEach((s,i)=>{const t=document.createElement('button');t.className='tab'+(i===c?' on':'');t.textContent=s.t;t.onclick=()=>{c=i;R()};T.appendChild(t)});B.innerHTML=S[c].h;B.style.animation='none';B.offsetHeight;B.style.animation='fadeUp .3s ease';renderMathInElement(B,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})}R()})();
 
 ;(function(){const el=document.getElementById('qftChart');for(let i=0;i<16;i++){const sp=i%4===0;const p=sp?.25:Math.random()*.005;const col=document.createElement('div');col.className='qft-col'+(sp?' spike':'');const bar=document.createElement('div');bar.className='qft-bar';bar.style.height='0%';const lbl=document.createElement('div');lbl.className='qft-lbl';lbl.textContent=i;const tip=document.createElement('div');tip.className='qft-tip';tip.textContent=sp?'P = '+(p*100).toFixed(0)+'%':'P ≈ '+(p*100).toFixed(1)+'%';col.appendChild(tip);col.appendChild(bar);col.appendChild(lbl);el.appendChild(col);const io=new IntersectionObserver(x=>{if(x[0].isIntersecting){setTimeout(()=>{bar.style.height=(p*100*5)+'%'},80+i*50);io.disconnect()}},{threshold:.2});io.observe(col)}})();
