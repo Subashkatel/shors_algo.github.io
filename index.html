@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shor's Algorithm for the Very Curious</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,400;1,8..60,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fff;--navy:#1a0e4b;--text:#1e1252;--text-body:#302660;--text-mid:#5e5485;
+  --text-light:#9590ac;--purple:#7c3aed;--purple-mid:#a855f7;--purple-light:#c4b5fd;
+  --purple-bg:rgba(124,58,237,.05);--green:#059669;--green-bg:#ecfdf5;--green-border:#86efac;
+  --red:#dc2626;--red-bg:#fef2f2;--border:#e5e1ef;--border-light:#f0edf7;--code-bg:#f8f7fc;
+  --serif:'Source Serif 4','Georgia',serif;--mono:'Menlo','Consolas','Courier New',monospace;
+  --sans:system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+html{font-size:19px;scroll-behavior:smooth}
+body{font-family:var(--serif);color:var(--text-body);background:var(--bg);line-height:1.78}
+
+.hero{background:linear-gradient(180deg,#ede9fe 0%,#f5f3ff 40%,#fff 100%);padding:100px 40px 60px}
+.hero-inner{max-width:800px;margin:0 auto}
+.hero h1{font-family:var(--serif);font-size:3.6rem;font-weight:800;line-height:1.08;color:var(--navy);letter-spacing:-1.5px;margin-bottom:24px;max-width:700px}
+.hero .byline{font-size:1rem;color:var(--text);font-weight:600;margin-bottom:6px}
+.hero .tagline{font-size:1rem;color:var(--text-mid);line-height:1.7;max-width:600px}
+.hero .rule{border:none;border-top:1px solid var(--border);margin-top:32px}
+
+article{max-width:800px;margin:0 auto;padding:0 40px}
+article p{margin-bottom:1.45em}
+article h2{font-family:var(--serif);font-size:1.7rem;font-weight:700;color:var(--navy);margin:3em 0 .8em;line-height:1.3}
+article h3{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--navy);margin:2em 0 .5em}
+strong{font-weight:600;color:var(--text)}
+a{color:var(--purple);text-decoration:none}a:hover{text-decoration:underline}
+blockquote{margin:1.6em 0;padding:2px 0 2px 22px;border-left:3px solid var(--purple-light);color:var(--text-mid);font-style:italic}
+blockquote p{margin-bottom:.3em}
+
+.math-block{background:var(--code-bg);border:1px solid var(--border-light);border-radius:10px;padding:24px 28px;margin:1.4em 0;overflow-x:auto}
+
+/* Review cards: subtle, no gradient header */
+.review{border:1px solid var(--border);border-radius:12px;margin:2.8em 0;overflow:hidden;background:var(--code-bg)}
+.review-head{padding:16px 26px 14px;border-bottom:1px solid var(--border-light)}
+.review-head span{font-family:var(--sans);font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--purple)}
+.review-body{padding:22px 26px 24px;background:white}
+.review-q{font-weight:600;color:var(--navy);margin-bottom:16px;line-height:1.6}
+.review-opts{display:flex;flex-direction:column;gap:9px}
+.r-btn{display:block;width:100%;text-align:left;padding:14px 18px;font-family:var(--serif);font-size:.92rem;line-height:1.55;border:1.5px solid var(--border);border-radius:10px;background:white;color:var(--text-body);cursor:pointer;transition:all .2s}
+.r-btn:hover{border-color:var(--purple);background:var(--purple-bg)}
+.r-btn.right{border-color:var(--green);background:var(--green-bg);color:#065f46}
+.r-btn.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red);opacity:.5}
+.r-btn.off{pointer-events:none}
+.r-exp{margin-top:14px;padding:14px 18px;border-radius:10px;font-size:.9rem;line-height:1.6;display:none}
+.r-exp.show{display:block}.r-exp.y{background:var(--green-bg);color:#065f46}.r-exp.n{background:var(--red-bg);color:var(--red)}
+
+.widget{border:1px solid var(--border);border-radius:14px;margin:2.2em 0;overflow:hidden;background:white;box-shadow:0 1px 4px rgba(26,14,75,.04)}
+.w-head{padding:14px 24px;border-bottom:1px solid var(--border-light);background:var(--code-bg);display:flex;align-items:center;gap:10px}
+.w-dot{width:8px;height:8px;border-radius:50%}
+.w-title{font-family:var(--sans);font-size:.72rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-mid)}
+.w-body{padding:28px}
+.w-foot{padding:12px 28px;border-top:1px solid var(--border-light);font-size:.82rem;color:var(--text-light);font-style:italic;text-align:center}
+
+.mt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.82rem}
+.mt th{text-align:left;padding:10px 14px;border-bottom:2px solid var(--border);font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);font-weight:600}
+.mt td{padding:10px 14px;border-bottom:1px solid var(--border-light);color:var(--text-mid)}
+.mt .hl{color:var(--purple);font-weight:700;background:var(--purple-bg)}
+.mt .an{color:var(--purple);font-family:var(--serif);font-style:italic;font-size:.88rem}
+.mt tr.nw td{animation:rIn .35s ease}
+@keyframes rIn{from{opacity:0;background:rgba(124,58,237,.08)}to{opacity:1}}
+
+.btn{font-family:var(--sans);font-size:.78rem;font-weight:600;padding:10px 22px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--text-mid);cursor:pointer;transition:all .15s}
+.btn:hover{border-color:var(--purple);color:var(--purple)}
+.btn-p{background:var(--purple);color:white;border-color:var(--purple)}
+.btn-p:hover{background:var(--navy);border-color:var(--navy);color:white}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.pill{font-family:var(--sans);font-size:.75rem;font-weight:600;padding:8px 18px;border-radius:22px;border:1.5px solid var(--border);background:white;color:var(--text-mid);cursor:pointer;transition:all .15s}
+.pill:hover{border-color:var(--purple);color:var(--purple)}
+.pill.on{background:var(--purple);color:white;border-color:var(--purple)}
+
+.tabs{display:flex;border-bottom:2px solid var(--border-light);margin-bottom:18px;overflow-x:auto}
+.tab{font-family:var(--sans);font-size:.72rem;font-weight:600;padding:12px 18px;border:none;background:none;color:var(--text-light);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--text)}.tab.on{color:var(--purple);border-bottom-color:var(--purple)}
+.tab-body{animation:fadeUp .3s ease}.tab-body p{margin-bottom:1em}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.result{text-align:center;padding:28px;background:var(--purple-bg);border:1.5px solid var(--purple-light);border-radius:12px;margin:20px 0}
+
+.qft-chart{display:flex;align-items:flex-end;gap:4px;height:180px;margin:16px 0 8px;position:relative}
+.qft-chart::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--border)}
+.qft-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;cursor:pointer}
+.qft-bar{width:100%;border-radius:4px 4px 0 0;transition:height .6s cubic-bezier(.34,1.3,.64,1)}
+.qft-col.spike .qft-bar{background:var(--purple)}
+.qft-col:not(.spike) .qft-bar{background:var(--border-light)}
+.qft-col:hover .qft-bar{opacity:.75}
+.qft-lbl{font-family:var(--mono);font-size:.6rem;color:var(--text-light);margin-top:6px}
+.qft-tip{position:absolute;top:-24px;font-family:var(--mono);font-size:.6rem;color:var(--purple);opacity:0;transition:opacity .15s;white-space:nowrap;font-weight:700}
+.qft-col:hover .qft-tip{opacity:1}
+
+.cyc-layout{display:flex;align-items:center;justify-content:center;gap:44px;flex-wrap:wrap;padding:10px 0}
+.cyc-info{max-width:250px}
+.cyc-r{font-family:var(--mono);font-size:2.6rem;font-weight:800;color:var(--purple);display:block;margin-bottom:8px;letter-spacing:-1px}
+.cyc-desc{font-size:.95rem;color:var(--text-mid);line-height:1.65}
+
+.calc{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:14px 0;padding:18px 22px;background:var(--code-bg);border-radius:10px;border:1px solid var(--border-light)}
+.calc label{font-family:var(--sans);font-size:.78rem;color:var(--text-mid);font-weight:600}
+.calc input{font-family:var(--mono);font-size:.88rem;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;color:var(--text);width:70px;text-align:center}
+.calc input:focus{outline:none;border-color:var(--purple)}
+.calc .calc-result{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--purple);margin-left:8px}
+
+/* Sidebar TOC */
+.sidebar{
+  position:fixed;top:100px;right:max(20px, calc((100vw - 800px)/2 - 240px));
+  width:200px;font-family:var(--sans);z-index:50;
+}
+.sidebar-title{
+  font-size:.82rem;font-weight:700;color:var(--purple);
+  margin-bottom:14px;letter-spacing:.3px;
+}
+.sidebar-link{
+  display:block;font-size:.72rem;color:var(--text-light);
+  padding:5px 0 5px 14px;border-left:2px solid var(--border-light);
+  text-decoration:none;transition:all .2s;line-height:1.45;
+}
+.sidebar-link:hover{color:var(--text-mid);border-left-color:var(--purple-light)}
+.sidebar-link.active{color:var(--purple);border-left-color:var(--purple);font-weight:600}
+
+.fn{font-size:.88rem;color:var(--text-light);border-top:1px solid var(--border);padding-top:20px;margin-top:4em;line-height:1.65;font-style:italic}
+.fn a{color:var(--purple)}
+footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);font-family:var(--sans)}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.rv.vis{opacity:1;transform:translateY(0)}
+@media(max-width:1100px){.sidebar{display:none}}
+@media(max-width:700px){html{font-size:17px}.hero{padding:60px 24px 40px}.hero h1{font-size:2.4rem}article{padding:0 24px}.w-body{padding:20px}.review-body{padding:20px}.cyc-layout{flex-direction:column}.calc{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="hero"><div class="hero-inner">
+  <h1>Shor's algorithm for the very curious</h1>
+  <div class="byline">An interactive walkthrough</div>
+  <p class="tagline">How a quantum computer breaks modern encryption, explained with real modular arithmetic you can verify by hand, interactive visualizations, and exercises to build genuine understanding.</p>
+  <hr class="rule">
+</div></div>
+
+<!-- Sidebar TOC -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-title">Shor's Algorithm</div>
+  <a href="#s-why" class="sidebar-link active" data-section="s-why">Why factoring is hard</a>
+  <a href="#s-key" class="sidebar-link" data-section="s-key">Factoring → period-finding</a>
+  <a href="#s-example" class="sidebar-link" data-section="s-example">Worked example: N = 15</a>
+  <a href="#s-explore" class="sidebar-link" data-section="s-explore">Explore choices of a</a>
+  <a href="#s-cycle" class="sidebar-link" data-section="s-cycle">Seeing the cycle</a>
+  <a href="#s-quantum" class="sidebar-link" data-section="s-quantum">The quantum computer</a>
+  <a href="#s-phase" class="sidebar-link" data-section="s-phase">Phase estimation</a>
+  <a href="#s-qft" class="sidebar-link" data-section="s-qft">QFT measurement</a>
+  <a href="#s-rsa" class="sidebar-link" data-section="s-rsa">RSA encryption</a>
+  <a href="#s-full" class="sidebar-link" data-section="s-full">Complete algorithm</a>
+  <a href="#s-sim" class="sidebar-link" data-section="s-sim">Interactive simulator</a>
+  <a href="#s-summary" class="sidebar-link" data-section="s-summary">Looking back</a>
+</nav>
+
+<article>
+
+<h2 id="s-why">Why factoring is hard</h2>
+<p>Every time you buy something online, send a private message, or log into your bank, your security depends on a single mathematical bet: that nobody can efficiently undo multiplication.</p>
+<p>Multiplying two prime numbers is easy. Any computer can compute $61 \times 53 = 3{,}233$ in a fraction of a second. But going the other direction is surprisingly difficult. If I hand you the number $3{,}233$ and ask you to find its prime factors, you have to search. For this small number the search is quick. But for numbers with hundreds of digits, the kind used in real encryption, the search space is so vast that no known classical algorithm can finish before the sun burns out.</p>
+<p>This asymmetry isn't some minor technicality. It's the foundation of RSA encryption, the system that protects most of the internet. The entire edifice of modern cryptography rests on the belief that factoring large numbers is effectively impossible.</p>
+<p>In 1994, the mathematician Peter Shor showed that this belief has a crack. He discovered a quantum algorithm that factors numbers exponentially faster than any known classical method. What makes Shor's result so striking isn't brute force. The algorithm doesn't simply try factors faster. Instead, it transforms the factoring problem into something completely different: finding the <strong>period</strong> of a repeating mathematical function. And period-finding turns out to be something quantum computers do remarkably well.</p>
+
+<h2 id="s-key">The key idea: factoring reduces to period-finding</h2>
+<p>Here's the central insight, and it's worth spending some time to understand it well, because everything else in the algorithm flows from it.</p>
+<p>Suppose you want to factor some number $N$. Pick any random number $a$ that shares no common factor with $N$ (in mathematical language, $\gcd(a, N) = 1$). Now look at what happens when you compute successive powers of $a$, taking the remainder after dividing by $N$ each time:</p>
+<div class="math-block">$$a^0 \bmod N,\quad a^1 \bmod N,\quad a^2 \bmod N,\quad a^3 \bmod N,\quad \ldots$$</div>
+<p>If you haven't seen modular arithmetic before: $a \bmod N$ simply means the remainder when you divide $a$ by $N$. So $49 \bmod 15 = 4$, because $49 \div 15 = 3$ with remainder $4$.</p>
+<p>The remarkable fact, guaranteed by number theory, is that <strong>this sequence always repeats</strong>. There is some smallest positive integer $r$, called the <em>period</em> or <em>order</em>, such that $a^r \equiv 1 \pmod{N}$, and then the entire pattern starts over from the beginning. Once you know $r$, and it happens to be even, the factors of $N$ can usually be found by a simple computation:</p>
+<div class="math-block">$$\gcd\!\left(a^{r/2} - 1,\; N\right) \qquad \text{and} \qquad \gcd\!\left(a^{r/2} + 1,\; N\right)$$</div>
+<p>Why does this work? The reasoning is elegant. Since $a^r \equiv 1 \pmod{N}$, we know that $N$ divides $a^r - 1$. If $r$ is even, we can write $a^r - 1 = (a^{r/2} - 1)(a^{r/2} + 1)$. So $N$ divides this product. If neither factor is itself divisible by $N$, then $N$ must split its prime factors between the two terms. And $\gcd$ extracts them.</p>
+<blockquote><p>An analogy may help. Imagine a clock with an unknown number of hours. You watch the hand move, and after exactly $r$ ticks, it returns to where it started. That period reveals the hidden structure of the clock. Shor's algorithm uses the period of $a^x \bmod N$ to reveal the hidden structure of $N$ in exactly this way.</p></blockquote>
+
+<div class="review rv" id="r1">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">What does Shor's algorithm convert the factoring problem into?</div>
+    <div class="review-opts" id="r1o">
+      <button class="r-btn" onclick="ck('r1',this,0)">A prime-testing problem</button>
+      <button class="r-btn" onclick="ck('r1',this,1)">A period-finding problem</button>
+      <button class="r-btn" onclick="ck('r1',this,0)">A matrix multiplication problem</button>
+    </div><div class="r-exp" id="r1e"></div>
+  </div>
+</div>
+
+<h2 id="s-example">Worked example: factoring $N = 15$</h2>
+<h3>Step 1: Choose a base</h3>
+<p>We pick $a = 7$. Verify: $\gcd(7, 15) = 1$. They are coprime, so we can proceed. (If the gcd were anything other than 1, we would have already found a factor without needing the quantum part at all.)</p>
+<h3>Step 2: Compute the modular powers</h3>
+<p>Compute $7^x \bmod 15$ for increasing $x$. Build the table row by row:</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Interactive: Modular exponentiation table</span></div>
+  <div class="w-body">
+    <table class="mt" id="mt"><thead><tr><th>$x$</th><th>$7^x$</th><th>$7^x \bmod 15$</th><th></th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-p" id="addB" onclick="addR()">Compute next row</button>
+      <button class="btn" onclick="showAll()">Show all rows</button>
+      <span id="hint" style="font-size:.85rem;color:var(--text-light);font-style:italic"></span>
+    </div>
+  </div>
+  <div class="w-foot" id="mFoot">Click "Compute next row" to build the table step by step.</div>
+</div>
+
+<p>The values cycle: $1, 7, 4, 13, 1, 7, 4, 13, \ldots$ The sequence repeats every 4 steps, so the period is $r = 4$.</p>
+
+<h3>Step 3: Extract the factors</h3>
+<p>Since $r = 4$ is even, compute $a^{r/2} = 7^2 = 49$ and apply the gcd formula:</p>
+<div class="math-block">$$a^{r/2} = 7^2 = 49$$$$\gcd(49 - 1,\; 15) = \gcd(48,\; 15) = \textcolor{#7c3aed}{\mathbf{3}}$$$$\gcd(49 + 1,\; 15) = \gcd(50,\; 15) = \textcolor{#7c3aed}{\mathbf{5}}$$</div>
+<div class="result rv"><span>$$15 = 3 \times 5$$</span></div>
+
+<div class="review rv" id="r2">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">We found $r = 4$. Why do we compute $\gcd(7^2 \pm 1,\; 15)$ specifically?</div>
+    <div class="review-opts" id="r2o">
+      <button class="r-btn" onclick="ck('r2',this,0)">Because $49$ is close to a multiple of 15</button>
+      <button class="r-btn" onclick="ck('r2',this,1)">Because the formula uses $a^{r/2}$, and $r/2 = 4/2 = 2$</button>
+      <button class="r-btn" onclick="ck('r2',this,0)">Because we always try exponent 2 first</button>
+    </div><div class="r-exp" id="r2e"></div>
+  </div>
+</div>
+
+<h2 id="s-explore">Explore different choices of $a$</h2>
+<p>We chose $a = 7$ and everything worked out. But the algorithm says to pick $a$ at random. What happens with other choices? It turns out that different values of $a$ produce different periods. Some lead directly to the factors; others give odd periods or trivial results, and you simply try again with a new $a$. The probability of success on each attempt is at least $1/2$, so you rarely need more than a few tries.</p>
+<p>Use the buttons below to explore this. Notice how the period changes, and whether the factor extraction succeeds or fails:</p>
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Interactive: Period explorer for $N = 15$</span></div>
+  <div class="w-body"><div class="pills" id="pills"></div><div id="expRes"></div></div>
+</div>
+
+<h3>Try your own modular arithmetic</h3>
+<div class="calc">
+  <label>a = <input type="number" id="calcA" value="7" min="2" max="100"></label>
+  <label>x = <input type="number" id="calcX" value="1" min="0" max="50"></label>
+  <label>mod N = <input type="number" id="calcN" value="15" min="2" max="1000"></label>
+  <button class="btn btn-p" onclick="doCalc()">Compute</button>
+  <span class="calc-result" id="calcRes"></span>
+</div>
+
+<h2 id="s-cycle">Seeing the cycle</h2>
+<p>The repeating values form a closed loop. Each step is "multiply by 7, take mod 15." After four steps you return to 1:</p>
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">The modular cycle</span></div>
+  <div class="w-body"><div class="cyc-layout"><svg id="cycSvg" width="260" height="260" viewBox="0 0 260 260"></svg><div class="cyc-info"><span class="cyc-r">$r = 4$</span><div class="cyc-desc">The values cycle through $\{1, 7, 4, 13\}$ forever. This is the signal the quantum Fourier transform will detect.</div></div></div></div>
+</div>
+
+<h2 id="s-quantum">Where the quantum computer comes in</h2>
+<p>At this point you might be wondering: we just found the period by computing a table. Why on earth do we need a quantum computer?</p>
+<p>The answer is scale. For $N = 15$, the period is $4$, and we only needed to evaluate four values to find it. But for a number with 600 digits, the period could be comparably enormous. A classical computer would need to evaluate a staggering number of modular exponentiations, one after another, to find where the pattern repeats. No classical shortcut is known.</p>
+<p>A quantum computer approaches this problem in a fundamentally different way. Rather than computing $a^x \bmod N$ for each value of $x$ one at a time, it places all possible values of $x$ into <em>superposition</em> and evaluates the function for all of them at once. Then it applies the Quantum Fourier Transform, which extracts the period from the interference pattern that results.</p>
+<p>That probably sounds like magic. To make it more concrete, step through each stage of the quantum circuit below:</p>
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Step-through: The quantum subroutine</span></div>
+  <div class="w-body"><div class="tabs" id="qTabs"></div><div id="qBody" class="tab-body"></div></div>
+</div>
+
+<h2 id="s-phase">Deeper look: phase estimation and the multiplication operator</h2>
+
+<p>If you want to understand not just <em>that</em> the quantum circuit works, but <em>why</em> it works, the key is to see Shor's algorithm as an instance of a more general protocol called <strong>quantum phase estimation</strong>.</p>
+
+<p>Consider the operation "multiply by $a$, modulo $N$." We can define this as a quantum operator $M_a$ that acts on basis states as $M_a|x\rangle = |ax \bmod N\rangle$. This operator is unitary: it simply shuffles the basis states around. For $N = 15$ and $a = 2$, it maps $|1\rangle \to |2\rangle \to |4\rangle \to |8\rangle \to |1\rangle$, cycling with period $r = 4$.</p>
+
+<p>Now here is the critical observation. This operator $M_a$ has eigenvectors $|\psi_j\rangle$ with eigenvalues $e^{2\pi i j/r}$ for $j = 0, 1, \ldots, r-1$. If we could somehow prepare one of these eigenvectors and feed it into a phase estimation circuit, we would directly measure the phase $\theta = j/r$ and read off $r$ from the denominator.</p>
+
+<p>But preparing the eigenvectors requires knowing $r$ in advance, which is the thing we are trying to find. The elegant solution: prepare the state $|1\rangle$ instead. It turns out that $|1\rangle$ is the <em>uniform superposition</em> of all the eigenvectors:</p>
+
+<div class="math-block">$$|1\rangle = \frac{1}{\sqrt{r}} \sum_{k=0}^{r-1} |\psi_k\rangle$$</div>
+
+<p>This means the phase estimation circuit, when given $|1\rangle$, will measure a random $k/r$ for some $k \in \{0, 1, \ldots, r-1\}$. From the denominator of this fraction, we recover $r$.</p>
+
+<h3>From measurement to period: the continued fractions table</h3>
+
+<p>In practice, the circuit uses $m$ qubits for measurement precision. For $N = 15$ with 8 measurement qubits, $Q = 2^8 = 256$. The measurement returns an integer that, divided by $Q$, approximates $k/r$. Here is the full table of possible outcomes for $a = 2$, $r = 4$:</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Measurement outcomes and period extraction</span></div>
+  <div class="w-body">
+    <table class="mt" style="font-size:.78rem">
+      <thead><tr><th>Binary output</th><th>Decimal</th><th>Phase ($y/Q$)</th><th>Fraction</th><th>Period $r$</th></tr></thead>
+      <tbody>
+        <tr><td>$00000000$</td><td>$0$</td><td>$0/256 = 0.00$</td><td>$0$</td><td style="color:var(--text-light)">undefined</td></tr>
+        <tr><td>$01000000$</td><td>$64$</td><td>$64/256 = 0.25$</td><td>$1/4$</td><td class="hl">$4$</td></tr>
+        <tr><td>$10000000$</td><td>$128$</td><td>$128/256 = 0.50$</td><td>$1/2$</td><td>$2$ (divisor)</td></tr>
+        <tr><td>$11000000$</td><td>$192$</td><td>$192/256 = 0.75$</td><td>$3/4$</td><td class="hl">$4$</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="w-foot">Each row shows one possible measurement outcome. Two of the four outcomes directly give $r = 4$.</div>
+</div>
+
+<p>Two out of four outcomes directly yield $r = 4$. The outcome $y = 128$ gives $r = 2$, which is a divisor of the true period. The outcome $y = 0$ is uninformative. With a few independent runs, the probability of determining $r$ correctly is very high.</p>
+
+<h3>From period to factors: completing the algorithm</h3>
+
+<p>Once we know $r = 4$, the classical post-processing computes $a^{r/2} = 2^2 = 4$ and extracts $\gcd(4-1, 15) = 3$ and $\gcd(4+1, 15) = 5$. This works for all valid choices of $a$.</p>
+
+<h3>What about real quantum hardware?</h3>
+
+<p>IBM has demonstrated Shor's algorithm on real quantum processors. For $N = 15$ with $a = 2$, the circuit requires 12 qubits (8 measurement + 4 target) and, after transpilation, has a two-qubit gate depth of about 187. Running on actual hardware introduces noise, but with error mitigation techniques, the correct factors can still be recovered. More recent demonstrations have factored $N = 21$ using compiled circuits on just 5 qubits.</p>
+
+<p>The limiting factor for scaling Shor's algorithm to cryptographically relevant numbers (2048+ bits) isn't the algorithm itself but the hardware. Current estimates suggest that factoring a 2048-bit RSA key would require roughly 20 million noisy qubits and about 8 hours of computation.</p>
+
+<h2 id="s-qft">The QFT measurement output</h2>
+<p>After the QFT, measurement probabilities spike at multiples of $Q/r$, where $Q$ is the register size. For $Q = 16$ and $r = 4$, spikes appear at $0, 4, 8, 12$. Hover over the bars to see probabilities:</p>
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Simulated QFT measurement probabilities</span></div>
+  <div class="w-body"><div class="qft-chart" id="qftChart"></div></div>
+  <div class="w-foot">Spikes at multiples of $Q/r = 16/4 = 4$. Each spike encodes the period.</div>
+</div>
+<p>From a measured value $m$, we form the fraction $m/Q$ and use the continued fractions algorithm to extract $r$:</p>
+<div class="math-block">$$m = 4 \implies \frac{4}{16} = \frac{1}{4} \implies r = 4 \quad\checkmark$$$$m = 12 \implies \frac{12}{16} = \frac{3}{4} \implies r = 4 \quad\checkmark$$$$m = 8 \implies \frac{8}{16} = \frac{1}{2} \implies r = 2 \quad\text{(divisor of 4; repeat measurement)}$$</div>
+
+<div class="review rv" id="r3">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">Why do QFT measurement probabilities spike at specific positions?</div>
+    <div class="review-opts" id="r3o">
+      <button class="r-btn" onclick="ck('r3',this,0)">The quantum computer only evaluates those values of $x$</button>
+      <button class="r-btn" onclick="ck('r3',this,1)">Quantum interference reinforces amplitudes at multiples of $Q/r$ and cancels them elsewhere</button>
+      <button class="r-btn" onclick="ck('r3',this,0)">The modular function only produces outputs at those positions</button>
+    </div><div class="r-exp" id="r3e"></div>
+  </div>
+</div>
+
+<h2 id="s-rsa">What this means for RSA encryption</h2>
+
+<p>RSA encryption, used to secure most of the internet, works like this: Alice picks two large primes $p$ and $q$, computes $N = p \times q$, and publishes $N$ as her public key. Anyone can encrypt a message using $N$, but only Alice (who knows $p$ and $q$) can decrypt it. The security of RSA rests entirely on the assumption that nobody can factor $N$ back into $p$ and $q$.</p>
+
+<p>A typical RSA key uses $N$ with 2048 bits (about 617 decimal digits). The best classical factoring algorithms would take roughly $10^{23}$ years to crack such a key. Shor's algorithm reduces this to a matter of hours on a sufficiently powerful quantum computer.</p>
+
+<p>This doesn't mean RSA is broken <em>today</em>. Current quantum computers have at most a few thousand noisy qubits. Factoring a 2048-bit number with Shor's algorithm would require an estimated 20 million physical qubits with error correction. But the threat is taken seriously enough that organizations like NIST have already standardized <strong>post-quantum cryptographic algorithms</strong> designed to resist quantum attacks. The transition to quantum-safe cryptography is underway.</p>
+
+<div class="review rv" id="r5">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">Why is RSA vulnerable to Shor's algorithm?</div>
+    <div class="review-opts" id="r5o">
+      <button class="r-btn" onclick="ck('r5',this,0)">Because quantum computers can try all possible keys simultaneously</button>
+      <button class="r-btn" onclick="ck('r5',this,1)">Because RSA's security depends on factoring being hard, and Shor's algorithm factors efficiently</button>
+      <button class="r-btn" onclick="ck('r5',this,0)">Because quantum computers can break any encryption scheme</button>
+    </div><div class="r-exp" id="r5e"></div>
+  </div>
+</div>
+
+<h2 id="s-full">The complete algorithm</h2>
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Full algorithm: step-through</span></div>
+  <div class="w-body"><div class="tabs" id="fTabs"></div><div id="fBody" class="tab-body"></div></div>
+</div>
+
+<h3>The speed difference</h3>
+<p>The best classical factoring algorithm (the general number field sieve) runs in sub-exponential time. Shor's runs in polynomial time: $O(n^3)$ for an $n$-bit number. For a 2048-bit RSA key, that is the difference between roughly $10^{23}$ years classically and a few hours on a sufficiently large quantum computer.</p>
+
+<div class="review rv" id="r4">
+  <div class="review-head"><span>Check your understanding</span></div>
+  <div class="review-body">
+    <div class="review-q">Which part of Shor's algorithm requires a quantum computer?</div>
+    <div class="review-opts" id="r4o">
+      <button class="r-btn" onclick="ck('r4',this,0)">Choosing $a$ and computing $\gcd$</button>
+      <button class="r-btn" onclick="ck('r4',this,1)">Finding the period $r$ via quantum Fourier sampling</button>
+      <button class="r-btn" onclick="ck('r4',this,0)">Computing $\gcd(a^{r/2} \pm 1,\; N)$</button>
+    </div><div class="r-exp" id="r4e"></div>
+  </div>
+</div>
+
+<h2 id="s-sim">Try it yourself: interactive simulator</h2>
+<p>Now that you understand the pieces, run the full algorithm yourself. This simulator walks through every stage of Shor's algorithm, showing probability distributions for the quantum registers at each step, just as a real quantum computer would produce them.</p>
+<p>Since this runs in JavaScript on your (classical) browser, the quantum part is simulated using probabilities. On a real quantum computer, the register states could never be directly observed like this; taking a single measurement would collapse the superposition.</p>
+
+<div class="widget rv" id="simWidget">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Interactive Simulator: Shor's Algorithm</span></div>
+  <div class="w-body" id="simBody">
+    <div id="simLog"></div>
+    <div id="simControls">
+      <p style="font-weight:600;color:var(--navy);margin-bottom:10px;font-size:1.05rem">Number to factor</p>
+      <div class="calc" style="margin:0 0 8px">
+        <label>N = <input type="number" id="simN" value="15" min="4" max="999" style="width:100px"></label>
+        <button class="btn btn-p" id="simStartBtn" onclick="S.start()">Factor</button>
+      </div>
+      <p style="font-size:.82rem;color:var(--text-light)">Try: 15, 21, 33, 35, 55, 77, 91, 143, 221, 299, 323</p>
+    </div>
+  </div>
+</div>
+
+<h2 id="s-summary">Looking back</h2>
+
+<p>We've seen that Shor's algorithm works through a chain of reductions. The problem of <strong>factoring</strong> a number is converted into the problem of <strong>finding the order</strong> of a modular exponential function. And order-finding is converted into <strong>quantum Fourier sampling</strong>, where superposition and interference do the heavy lifting.</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Algorithm flowchart</span></div>
+  <div class="w-body" style="text-align:center">
+    <svg viewBox="0 0 700 100" style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+      <defs><marker id="flowArr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#7c3aed" opacity=".6"/></marker></defs>
+      <rect x="0" y="30" width="120" height="40" rx="8" fill="#f8f7fc" stroke="#e5e1ef" stroke-width="1.5"/>
+      <text x="60" y="55" text-anchor="middle" fill="#1a0e4b" font-size="12" font-weight="600">Pick random a</text>
+      <line x1="120" y1="50" x2="155" y2="50" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#flowArr)"/>
+      <rect x="155" y="30" width="100" height="40" rx="8" fill="#f8f7fc" stroke="#e5e1ef" stroke-width="1.5"/>
+      <text x="205" y="55" text-anchor="middle" fill="#1a0e4b" font-size="12" font-weight="600">Check gcd</text>
+      <line x1="255" y1="50" x2="290" y2="50" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#flowArr)"/>
+      <rect x="290" y="25" width="130" height="50" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="355" y="47" text-anchor="middle" fill="#7c3aed" font-size="11" font-weight="700">Quantum</text>
+      <text x="355" y="62" text-anchor="middle" fill="#7c3aed" font-size="11" font-weight="700">period-finding</text>
+      <line x1="420" y1="50" x2="455" y2="50" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#flowArr)"/>
+      <rect x="455" y="30" width="100" height="40" rx="8" fill="#f8f7fc" stroke="#e5e1ef" stroke-width="1.5"/>
+      <text x="505" y="48" text-anchor="middle" fill="#1a0e4b" font-size="11" font-weight="600">Continued</text>
+      <text x="505" y="62" text-anchor="middle" fill="#1a0e4b" font-size="11" font-weight="600">fractions</text>
+      <line x1="555" y1="50" x2="590" y2="50" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#flowArr)"/>
+      <rect x="590" y="30" width="110" height="40" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+      <text x="645" y="55" text-anchor="middle" fill="#7c3aed" font-size="12" font-weight="700">Factors!</text>
+    </svg>
+  </div>
+</div>
+
+<p>There is a deeper lesson here that goes beyond the algorithm itself. For decades, computer scientists assumed that factoring was inherently hard. Not because anyone could prove it was inherently hard, but because nobody could find a fast algorithm, despite many smart people trying. Shor's algorithm showed that this difficulty was not a property of the problem. It was a property of the kind of computer being used to solve it.</p>
+
+<p>Classical computers manipulate bits. Quantum computers manipulate qubits, which can exist in superposition and become entangled. These are not just engineering improvements over classical bits. They are fundamentally different physical resources, and they make certain computations tractable that were previously thought to be out of reach.</p>
+
+<p>That said, it's important not to overstate the case. Shor's algorithm doesn't make quantum computers universally faster than classical ones. It exploits a very specific mathematical structure: the periodicity of modular exponentiation. Not all problems have this structure, and for many computational tasks, a classical computer remains the better tool. What Shor showed is that for the particular problem of factoring, the consequences of quantum mechanics are profound.</p>
+
+</article>
+
+<div style="max-width:800px;margin:0 auto;padding:40px 40px 0;border-top:1px solid var(--border)">
+  <p style="font-family:var(--sans);font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--purple);margin-bottom:16px">Further reading</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:.88rem;line-height:1.6">
+    <a href="https://quantum.country/qcvc" style="display:block;padding:16px 20px;background:var(--code-bg);border:1px solid var(--border-light);border-radius:10px;color:var(--text-body);text-decoration:none;transition:border-color .15s">
+      <strong style="color:var(--navy);display:block;margin-bottom:4px">Quantum computing for the very curious</strong>
+      <span style="color:var(--text-mid);font-size:.82rem">Andy Matuschak and Michael Nielsen. An introduction to quantum computing with embedded spaced-repetition testing.</span>
+    </a>
+    <a href="https://quantum.cloud.ibm.com/docs/en/tutorials/shors-algorithm" style="display:block;padding:16px 20px;background:var(--code-bg);border:1px solid var(--border-light);border-radius:10px;color:var(--text-body);text-decoration:none;transition:border-color .15s">
+      <strong style="color:var(--navy);display:block;margin-bottom:4px">IBM Shor's algorithm tutorial</strong>
+      <span style="color:var(--text-mid);font-size:.82rem">Hands-on implementation with Qiskit, including running on real quantum hardware.</span>
+    </a>
+    <a href="https://algassert.com/post/1718" style="display:block;padding:16px 20px;background:var(--code-bg);border:1px solid var(--border-light);border-radius:10px;color:var(--text-body);text-decoration:none;transition:border-color .15s">
+      <strong style="color:var(--navy);display:block;margin-bottom:4px">Shor's Quantum Factoring Algorithm</strong>
+      <span style="color:var(--text-mid);font-size:.82rem">Craig Gidney. Connects signal processing, number theory, and quantum computing.</span>
+    </a>
+    <a href="https://blendmaster.github.io/ShorJS/" style="display:block;padding:16px 20px;background:var(--code-bg);border:1px solid var(--border-light);border-radius:10px;color:var(--text-body);text-decoration:none;transition:border-color .15s">
+      <strong style="color:var(--navy);display:block;margin-bottom:4px">ShorJS Interactive Simulator</strong>
+      <span style="color:var(--text-mid);font-size:.82rem">Steven Ruppert et al. A JavaScript simulator that visualizes every stage of the algorithm.</span>
+    </a>
+  </div>
+  <p style="font-size:.82rem;color:var(--text-light);margin-top:20px;font-style:italic;line-height:1.6">Peter Shor, "Algorithms for quantum computation: discrete logarithms and factoring" (1994). Also: Nielsen and Chuang, <em>Quantum Computation and Quantum Information</em>, the standard textbook.</p>
+</div>
+
+<footer>Shor's Algorithm for the Very Curious</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})});
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')})},{threshold:.08});document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+// Sidebar active section tracking
+const sectionIds=['s-why','s-key','s-example','s-explore','s-cycle','s-quantum','s-phase','s-qft','s-rsa','s-full','s-sim','s-summary'];
+const sidebarLinks=document.querySelectorAll('.sidebar-link');
+function updateSidebar(){
+  let current='s-why';
+  for(const id of sectionIds){
+    const el=document.getElementById(id);
+    if(el&&el.getBoundingClientRect().top<=150)current=id;
+  }
+  sidebarLinks.forEach(link=>{
+    link.classList.toggle('active',link.getAttribute('data-section')===current);
+  });
+}
+window.addEventListener('scroll',updateSidebar,{passive:true});
+updateSidebar();
+
+const A={r1:{y:"Correct. Shor's central insight is to convert factoring into finding the period of a modular exponential function.",n:"The key reduction is factoring to period-finding: detecting how quickly a^x mod N repeats."},r2:{y:"Exactly. The formula uses a^(r/2). Since r = 4, r/2 = 2, so we compute 7² = 49, then gcd(49 ± 1, 15).",n:"The formula requires a^(r/2). With r = 4, that gives 7² = 49."},r3:{y:"Right. Constructive interference at multiples of Q/r, destructive interference elsewhere.",n:"The spikes come from quantum interference: amplitudes reinforce at multiples of Q/r and cancel everywhere else."},r4:{y:"Correct. Only the period-finding step needs quantum resources. Everything else is classical.",n:"Only quantum Fourier sampling requires a quantum computer. Choosing a and computing gcd are classical."},r5:{y:"Correct. RSA's entire security rests on the difficulty of factoring. Shor's algorithm solves exactly that problem in polynomial time.",n:"Shor's algorithm does not try all keys. It specifically exploits the fact that RSA depends on factoring being hard. By factoring N = p × q efficiently, it recovers the private key."}};
+function ck(id,b,ok){const os=document.querySelectorAll('#'+id+'o .r-btn');os.forEach(x=>{x.classList.add('off');if(x===b)x.classList.add(ok?'right':'wrong')});if(!ok)os.forEach((x,i)=>{if(x!==b){const c=(id==='r1'&&i===1)||(id==='r2'&&i===1)||(id==='r3'&&i===1)||(id==='r4'&&i===1)||(id==='r5'&&i===1);if(c)x.classList.add('right')}});const e=document.getElementById(id+'e');e.textContent=ok?A[id].y:A[id].n;e.className='r-exp show '+(ok?'y':'n')}
+
+let mi=0;const md=[{x:0,p:'1',m:1},{x:1,p:'7',m:7},{x:2,p:'49',m:4},{x:3,p:'343',m:13},{x:4,p:'2,\\!401',m:1},{x:5,p:'16,\\!807',m:7},{x:6,p:'117,\\!649',m:4},{x:7,p:'823,\\!543',m:13},{x:8,p:'5,\\!764,\\!801',m:1}];
+function addR(){if(mi>=md.length)return;const d=md[mi],t=document.querySelector('#mt tbody'),r=document.createElement('tr');r.className='nw';const h=d.x>0&&d.m===1;r.innerHTML='<td>'+d.x+'</td><td>$'+d.p+'$</td><td class="'+(h?'hl':'')+'">'+d.m+'</td><td class="an">'+(h?'← repeats!':'')+'</td>';t.appendChild(r);mi++;renderMathInElement(r,{delimiters:[{left:'$',right:'$',display:false}],throwOnError:false});if(mi===5){document.getElementById('hint').innerHTML='The value <strong>returned to 1</strong>. The pattern repeats!';document.getElementById('hint').style.color='var(--purple)'}if(mi>=md.length){document.getElementById('addB').style.display='none';const f=document.getElementById('mFoot');f.textContent='Period r = 4. The sequence {1, 7, 4, 13} repeats forever.';f.style.color='var(--purple)';f.style.fontStyle='normal';f.style.fontWeight='600'}}
+function showAll(){while(mi<md.length)addR()}
+
+function doCalc(){const a=+document.getElementById('calcA').value,x=+document.getElementById('calcX').value,n=+document.getElementById('calcN').value;if(n<2||a<1)return;let v=1n;const ba=BigInt(a),bn=BigInt(n);for(let i=0;i<x;i++)v=(v*ba)%bn;document.getElementById('calcRes').textContent='= '+v.toString()}
+
+;(function(){const D={2:{s:[1,2,4,8],r:4,f:[1,2,4,8,1,2,4,8]},4:{s:[1,4],r:2,f:[1,4,1,4,1,4,1,4]},7:{s:[1,7,4,13],r:4,f:[1,7,4,13,1,7,4,13]},11:{s:[1,11],r:2,f:[1,11,1,11,1,11,1,11]},13:{s:[1,13,4,7],r:4,f:[1,13,4,7,1,13,4,7]},14:{s:[1,14],r:2,f:[1,14,1,14,1,14,1,14]}};let c=7;function g(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}function R(){const p=document.getElementById('pills');p.innerHTML='';for(const a of Object.keys(D)){const b=document.createElement('button');b.className='pill'+(parseInt(a)===c?' on':'');b.textContent='a = '+a;b.onclick=()=>{c=parseInt(a);R()};p.appendChild(b)}const d=D[c],e=document.getElementById('expRes');let h='<div class="math-block" style="margin-top:16px">Sequence: '+d.f.join(', ')+'<br><br>Cycle: $\\{'+d.s.join(', ')+'\\}$ &nbsp;&middot;&nbsp; period $r = '+d.r+'$</div>';const r=d.r;if(r%2!==0){h+='<p style="margin-top:12px;color:var(--red)"><strong>$r = '+r+'$ is odd.</strong> The formula requires an even period. Try a different $a$.</p>'}else{const hf=r/2,aH=Math.pow(c,hf),g1=g(aH-1,15),g2=g(aH+1,15);h+='<div class="math-block" style="margin-top:12px">$\\gcd('+aH+'-1,\\; 15) = \\gcd('+(aH-1)+',\\; 15) = \\textcolor{#7c3aed}{\\mathbf{'+g1+'}}$<br>$\\gcd('+aH+'+1,\\; 15) = \\gcd('+(aH+1)+',\\; 15) = \\textcolor{#7c3aed}{\\mathbf{'+g2+'}}$</div>';if((g1===1||g1===15)&&(g2===1||g2===15)){h+='<p style="margin-top:10px;color:var(--red)"><strong>Trivial factors.</strong> Need a different $a$.</p>'}else{const f1=(g1!==1&&g1!==15)?g1:g2;h+='<div class="result"><span>$$15 = '+Math.min(f1,15/f1)+' \\times '+Math.max(f1,15/f1)+'$$</span></div>'}}e.innerHTML=h;renderMathInElement(e,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})}R()})();
+
+;(function(){const svg=document.getElementById('cycSvg');const vals=[1,7,4,13];const colors=['#5b21b6','#7c3aed','#a855f7','#c084fc'];const cx=130,cy=130,R=90;let h='';
+h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="#e5e1ef" stroke-width="1.5" stroke-dasharray="6,5"/>';
+vals.forEach((v,i)=>{const ang=-Math.PI/2+i*(Math.PI/2);const x=cx+R*Math.cos(ang);const y=cy+R*Math.sin(ang);const ni=(i+1)%4;const nAng=-Math.PI/2+ni*(Math.PI/2);const nx=cx+R*Math.cos(nAng);const ny=cy+R*Math.sin(nAng);
+const midAng=ang+Math.PI/4;const cR=R*1.28;const mx=cx+cR*Math.cos(midAng);const my=cy+cR*Math.sin(midAng);
+const dx=nx-mx,dy=ny-my;const dLen=Math.sqrt(dx*dx+dy*dy);const shrink=28;const ex=nx-dx/dLen*shrink,ey=ny-dy/dLen*shrink;
+h+='<defs><marker id="arr'+i+'" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0,1 7,3.5 0,6" fill="'+colors[i]+'" opacity=".5"/></marker></defs>';
+h+='<path d="M'+x+','+y+' Q'+mx+','+my+' '+ex+','+ey+'" fill="none" stroke="'+colors[i]+'" stroke-width="1.5" opacity=".35" marker-end="url(#arr'+i+')"/>';
+h+='<circle cx="'+x+'" cy="'+y+'" r="26" fill="white" stroke="'+colors[i]+'" stroke-width="2.5"/>';
+h+='<text x="'+x+'" y="'+(y+1)+'" text-anchor="middle" dominant-baseline="central" fill="'+colors[i]+'" font-family="Menlo,Consolas,monospace" font-size="14" font-weight="700">'+v+'</text>';
+});svg.innerHTML=h})();
+
+;(function(){const S=[
+{t:'1. Superposition',h:'<p>Prepare two quantum registers. Apply Hadamard gates to put the first into an equal superposition of all exponent values:</p><div class="math-block">$$|\\psi\\rangle = \\frac{1}{\\sqrt{Q}} \\sum_{x=0}^{Q-1} |x\\rangle|0\\rangle$$</div><p>For $Q = 16$, all sixteen values of $x$ exist simultaneously in the quantum state.</p>'},
+{t:'2. Mod exp',h:'<p>Apply a unitary gate that computes $f(x) = 7^x \\bmod 15$ and stores it in the second register:</p><div class="math-block">$$|\\psi\\rangle \\to \\frac{1}{\\sqrt{Q}} \\sum_{x=0}^{Q-1} |x\\rangle|7^x \\bmod 15\\rangle$$</div><p>One quantum operation evaluates the function for <strong>all 16 inputs simultaneously</strong>.</p>'},
+{t:'3. QFT',h:'<p>The <strong>Quantum Fourier Transform</strong> converts the periodic pattern in the amplitudes into sharp frequency peaks, just as a prism splits light into its component wavelengths.</p><div class="math-block">$$\\text{QFT detects: "this signal repeats every } r = 4 \\text{ steps"}$$</div><p>At multiples of $Q/r$, amplitudes <strong>constructively interfere</strong> (add up). Everywhere else, they <strong>destructively interfere</strong> (cancel to near zero).</p>'},
+{t:'4. Measure',h:'<p>Measure the first register. The interference pattern ensures you get a "spike" value with high probability:</p><div class="math-block">$$m = 4 \\implies \\frac{4}{16} = \\frac{1}{4} \\implies r = 4 \\;\\checkmark$$$$m = 12 \\implies \\frac{12}{16} = \\frac{3}{4} \\implies r = 4 \\;\\checkmark$$</div><p>The continued fractions algorithm extracts $r$ from $m/Q$. A handful of measurements determine $r$ with near certainty.</p>'}
+];let c=0;function R(){const T=document.getElementById('qTabs'),B=document.getElementById('qBody');T.innerHTML='';S.forEach((s,i)=>{const t=document.createElement('button');t.className='tab'+(i===c?' on':'');t.textContent=s.t;t.onclick=()=>{c=i;R()};T.appendChild(t)});B.innerHTML=S[c].h;B.style.animation='none';B.offsetHeight;B.style.animation='fadeUp .3s ease';renderMathInElement(B,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})}R()})();
+
+;(function(){const el=document.getElementById('qftChart');for(let i=0;i<16;i++){const sp=i%4===0;const p=sp?.25:Math.random()*.005;const col=document.createElement('div');col.className='qft-col'+(sp?' spike':'');const bar=document.createElement('div');bar.className='qft-bar';bar.style.height='0%';const lbl=document.createElement('div');lbl.className='qft-lbl';lbl.textContent=i;const tip=document.createElement('div');tip.className='qft-tip';tip.textContent=sp?'P = '+(p*100).toFixed(0)+'%':'P ≈ '+(p*100).toFixed(1)+'%';col.appendChild(tip);col.appendChild(bar);col.appendChild(lbl);el.appendChild(col);const io=new IntersectionObserver(x=>{if(x[0].isIntersecting){setTimeout(()=>{bar.style.height=(p*100*5)+'%'},80+i*50);io.disconnect()}},{threshold:.2});io.observe(col)}})();
+
+;(function(){const S=[
+{t:'1. Classical setup',h:'<p>Pick random $a$ with $1 < a < N$. Compute $\\gcd(a, N)$. If it isn\'t 1, you\'ve already found a factor! Otherwise, proceed to the quantum part.</p>'},
+{t:'2. Quantum period-finding',h:'<p>Build the quantum circuit: superposition, modular exponentiation, QFT, measurement. Extract $r$ via continued fractions. This is the <strong>only step that requires a quantum computer</strong>.</p>'},
+{t:'3. Classical post-processing',h:'<p>If $r$ is odd, or $a^{r/2} \\equiv -1 \\pmod{N}$, pick a new $a$ and restart. Otherwise compute:</p><div class="math-block">$$\\gcd(a^{r/2} - 1,\\; N) \\qquad \\text{and} \\qquad \\gcd(a^{r/2} + 1,\\; N)$$</div><p>At least one is a non-trivial factor. Success probability is greater than $1/2$ per attempt.</p>'},
+{t:'4. Complexity',h:'<div class="math-block">$$\\text{Classical (GNFS):} \\sim \\exp\\!\\left(c \\cdot n^{1/3} (\\log n)^{2/3}\\right)$$$$\\text{Shor\'s (quantum):} \\sim O(n^3)$$</div><p>For $n = 2048$ bits: classical takes roughly $10^{23}$ years. Quantum takes roughly hours.</p>'}
+];let c=0;function R(){const T=document.getElementById('fTabs'),B=document.getElementById('fBody');T.innerHTML='';S.forEach((s,i)=>{const t=document.createElement('button');t.className='tab'+(i===c?' on':'');t.textContent=s.t;t.onclick=()=>{c=i;R()};T.appendChild(t)});B.innerHTML=S[c].h;B.style.animation='none';B.offsetHeight;B.style.animation='fadeUp .3s ease';renderMathInElement(B,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})}R()})();
+
+// ===== SHOR SIMULATOR (comprehensive, inspired by ShorJS) =====
+const S = {
+  n:15, a:7, r:0, Q:0, q:0,
+  gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a},
+  modpow(base,exp,mod){let r=1;base=base%mod;while(exp>0){if(exp%2===1)r=(r*base)%mod;exp=Math.floor(exp/2);base=(base*base)%mod}return r},
+  findPeriod(a,n){for(let r=1;r<n*2;r++){if(this.modpow(a,r,n)===1)return r}return -1},
+  isPrime(n){
+    if(n<2)return false;
+    if(n===2||n===3||n===5||n===7||n===11||n===13)return true;
+    if(n%2===0||n%3===0)return false;
+    for(let i=5;i*i<=n;i+=6){if(n%i===0||n%(i+2)===0)return false}
+    return true;
+  },
+  isPrimePower(n){for(let p=2;p*p<=n;p++){if(n%p===0){let v=n;while(v%p===0)v/=p;if(v===1)return true}}return false},
+
+  log(html){document.getElementById('simLog').innerHTML+=html;this.remath(document.getElementById('simLog'))},
+  clearLog(){document.getElementById('simLog').innerHTML=''},
+  remath(el){renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})},
+
+  drawChart(canvasId,data,opts={}){
+    const wrap=document.getElementById(canvasId).parentElement;
+    const canvas=document.getElementById(canvasId);
+    const W=wrap.clientWidth;const H=opts.height||160;
+    canvas.width=W*2;canvas.height=H*2;canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');ctx.scale(2,2);
+    ctx.fillStyle='#f8f7fc';ctx.fillRect(0,0,W,H);
+    const maxV=Math.max(...data.map(d=>d.v),0.001);
+    const pad=30;const chartW=W-pad*2;const chartH=H-40;
+    const barW=Math.max(1,chartW/data.length-1);
+    // axis
+    ctx.strokeStyle='#e5e1ef';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad,chartH+5);ctx.lineTo(W-pad,chartH+5);ctx.stroke();
+    for(let i=0;i<data.length;i++){
+      const h=(data[i].v/maxV)*chartH;
+      const x=pad+i*(barW+1);
+      ctx.fillStyle=data[i].hl?'#7c3aed':'#c4b5fd';
+      ctx.fillRect(x,chartH+5-h,barW,h);
+    }
+    // labels
+    ctx.fillStyle='#9590ac';ctx.font='9px system-ui';ctx.textAlign='center';
+    if(data.length<=64){
+      const step=Math.max(1,Math.floor(data.length/16));
+      for(let i=0;i<data.length;i+=step){
+        const x=pad+i*(barW+1)+barW/2;
+        ctx.fillText(opts.labels?opts.labels[i]:i,x,chartH+18);
+      }
+    }else{
+      for(let i=0;i<data.length;i+=Math.floor(data.length/8)){
+        const x=pad+i*(barW+1)+barW/2;ctx.fillText(i,x,chartH+18);
+      }
+    }
+    if(opts.title){ctx.fillStyle='#5e5485';ctx.font='bold 10px system-ui';ctx.textAlign='left';ctx.fillText(opts.title,pad,14)}
+  },
+
+  setControls(html){document.getElementById('simControls').innerHTML=html;this.remath(document.getElementById('simControls'))},
+
+  start(){
+    const n=parseInt(document.getElementById('simN').value);
+    if(isNaN(n)||n<4){this.log('<p style="color:var(--red)">Please enter a number of 4 or more.</p>');return}
+    this.clearLog();
+    this.n=n;
+
+    // Validation
+    const isEven = (n % 2 === 0);
+    const prime = this.isPrime(n);
+    const primePow = this.isPrimePower(n);
+    const valid = !isEven && !prime && !primePow;
+
+    let checks='<div style="margin:12px 0;padding:20px 24px;background:var(--code-bg);border-radius:10px;border:1px solid var(--border-light)">';
+    checks+='<p style="font-weight:600;color:var(--navy);margin-bottom:10px">In order for Shor\'s algorithm to work, $N$ has to be:</p>';
+    checks+='<ul style="list-style:none;padding:0;margin:0 0 4px">';
+
+    // Check 1: composite (not prime)
+    if(prime){checks+='<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>composite</strong> (not prime): It\'s prime!</li>'}
+    else{checks+='<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>composite</strong> (not prime): check!</li>'}
+
+    // Check 2: not a power of a prime
+    if(!prime && primePow){checks+='<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>not a power of a prime</strong>: It\'s a prime power!</li>'}
+    else if(!prime){checks+='<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>not a power of a prime</strong>: check!</li>'}
+
+    // Check 3: odd
+    if(isEven){checks+='<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>odd</strong>: It\'s even! Divide by 2 first.</li>'}
+    else{checks+='<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>odd</strong>: check!</li>'}
+
+    checks+='</ul></div>';
+    this.log(checks);
+
+    if(!valid){
+      this.log('<p style="color:var(--red);font-weight:600;margin-top:8px">Uh-oh, your number didn\'t pass the test. Try another number!</p>');
+      this.remath(document.getElementById('simLog'));
+      return;
+    }
+
+    this.log('<p>Thus, $N = '+n+'$ is the product of two coprime numbers greater than 1. As a consequence of the Chinese Remainder Theorem, $1$ has at least four distinct square roots modulo $N$, two of them being $1$ and $-1$. The aim of the algorithm is to find a square root $b$ of $1$, other than $1$ and $-1$; such a $b$ will lead to a factorization of $N$.</p>');
+    this.log('<p>In turn, finding such a $b$ is reduced to finding an element $a$ of even period with another certain additional property. The quantum algorithm is used for finding the period of randomly chosen elements $a$, as order-finding is a hard problem on a classical computer.</p>');
+    this.log('<h3 style="margin:1.5em 0 .5em;color:var(--navy)">Classical Part</h3>');
+    this.log('<p>Now, a number $a$ between $1$ and $N$ exclusive is randomly picked. For illustration, you can pick it yourself, or hit the "Randomize" button to have a value generated for you. Press "Continue" to continue the algorithm.</p>');
+
+    let aVal=2+Math.floor(Math.random()*(n-3));
+    while(this.gcd(aVal,n)!==1&&aVal<n-1)aVal++;
+
+    this.setControls(`
+      <div class="calc" style="margin:0 0 8px">
+        <label>a = <input type="number" id="simA" value="${aVal}" min="2" max="${n-1}" style="width:80px"></label>
+        <button class="btn" onclick="S.randomA()">Randomize</button>
+        <button class="btn btn-p" onclick="S.checkA()">Continue</button>
+      </div>
+    `);
+  },
+
+  randomA(){
+    const n=this.n;let a;do{a=2+Math.floor(Math.random()*(n-3))}while(this.gcd(a,n)!==1);
+    document.getElementById('simA').value=a;
+  },
+
+  checkA(){
+    const a=parseInt(document.getElementById('simA').value);
+    const n=this.n;
+    if(isNaN(a)||a<2||a>=n){this.log('<p style="color:var(--red)">Choose $a$ between 2 and '+(n-1)+'.</p>');return}
+    this.a=a;
+    const g=this.gcd(a,n);
+    this.log('<p>Now, $\\gcd(a, N)$ is calculated using the Euclidean algorithm.</p>');
+    this.log('<p>$\\gcd('+a+', '+n+') = '+g+'$</p>');
+
+    if(g!==1){
+      this.log('<p>The result of the gcd is not $1$, so <strong style="color:var(--purple)">'+g+'</strong> is itself a non-trivial factor of $'+n+'$. You got lucky!</p>');
+      this.log('<div class="result"><span>$$'+n+' = '+g+' \\times '+(n/g)+'$$</span></div>');
+      this.setControls('<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="S.retryA()">Try new $a$</button><button class="btn btn-p" onclick="S.reset()">Try new $N$</button></div>');
+      this.remath(document.getElementById('simLog'));
+      return;
+    }
+
+    this.log('<p>The gcd is $1$, so $a$ and $N$ are coprime. Otherwise, the result would itself be a non-trivial factor of $N$. Now we need to find the period of $'+a+'^x \\bmod '+n+'$. This is where the quantum part of the algorithm comes in.</p>');
+    this.log('<p>A graph of $'+a+'^x \\bmod '+n+'$ for a few values is shown below. With small numbers, it is easy to see the periodicity:</p>');
+
+    // Show a^x mod n graph
+    const r=this.findPeriod(a,n);this.r=r;
+    const numPts=Math.min(r*4,80);
+    const vals=[];for(let x=0;x<numPts;x++)vals.push({v:this.modpow(a,x,n),hl:x%r===0});
+
+    this.log('<p style="font-weight:600;color:var(--navy);margin-top:1em">$'+a+'^x \\bmod '+n+'$</p>');
+    this.log('<div style="height:160px;margin:8px 0" id="simChart1Wrap"><canvas id="simChart1" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.remath(document.getElementById('simLog'));
+    setTimeout(()=>this.drawChart('simChart1',vals,{title:'a^x mod n',height:160}),50);
+
+    this.log('<p>However, we are not going for simplicity, so it is time for the quantum part!</p>');
+
+    // Quantum part
+    this.log('<h3 style="margin:1.5em 0 .5em;color:var(--navy)">Quantum Part</h3>');
+    let Q=1,q=0;while(Q<n*n){Q*=2;q++}
+    this.Q=Q;this.q=q;
+
+    this.log('<p>First, we need a quantum register big enough to hold $Q$ numbers, such that $N^2 \\leq Q \\leq 2N^2$. This gives enough room to see the periodicity of $a^x \\bmod N$, even if the period is close to $N/2$. To do this, we need a $'+q+'$-qubit wide quantum register.</p>');
+    this.log('<p>For $'+n+'$, we need $'+q+'$ qubits ($Q = '+Q+'$). These qubits can represent the numbers from $0$ to $'+(Q-1)+'$. They are initialized so that measuring the state of the quantum register gives us a random number from $0$ to $'+(Q-1)+'$ with equal probability.</p>');
+    this.log('<p>To illustrate the state of the quantum register, here is a graph of the probability density function of measuring the register, where the x-axis represents the value that would be measured. With a real quantum register, a graph like this could never actually be measured, since taking one reading would collapse all future readings.</p>');
+
+    // Initial uniform register
+    const uniData=[];for(let i=0;i<Math.min(Q,256);i++)uniData.push({v:1,hl:false});
+    this.log('<p style="font-weight:600;color:var(--navy)">Initial quantum register (probability distribution)</p>');
+    this.log('<div style="height:120px;margin:8px 0" id="simChart2Wrap"><canvas id="simChart2" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.remath(document.getElementById('simLog'));
+    setTimeout(()=>this.drawChart('simChart2',uniData,{title:'Uniform superposition',height:120}),100);
+
+    this.log('<p>Of course, it is a pretty boring graph, if everything went right.</p>');
+    this.log('<p>It gets more interesting now, though. We are going to apply a transform to the register based on the $'+a+'^x \\bmod '+n+'$ function, where $x$ is represented by each possible state of the quantum register. The remarkable thing with a real quantum computer is that every single calculation of $a^x \\bmod N$ is done in parallel by the property of superposition. The result is stored within a second quantum register:</p>');
+
+    // Transformed register (only r distinct values have nonzero probability)
+    const transData=[];const modVals={};
+    for(let x=0;x<Math.min(Q,256);x++){const v=this.modpow(a,x,n);modVals[v]=(modVals[v]||0)+1}
+    const distinctVals=Object.keys(modVals).map(Number).sort((a,b)=>a-b);
+    const transArr=[];for(let v=0;v<n;v++)transArr.push({v:modVals[v]||0,hl:(modVals[v]||0)>0});
+
+    this.log('<p style="font-weight:600;color:var(--navy)">Second register after modular exponentiation</p>');
+    this.log('<div style="height:140px;margin:8px 0" id="simChart3Wrap"><canvas id="simChart3" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.remath(document.getElementById('simLog'));
+    setTimeout(()=>this.drawChart('simChart3',transArr,{title:'a^x mod N values',height:140}),150);
+
+    this.log('<p>There should now be only a few peaks, with the probability of any other state at $0$. This is because after taking $a^x \\bmod N$ for every $x$, the periodicity of that function means only '+distinctVals.length+' values (the cycle $\\{'+distinctVals.join(', ')+'\\}$) will show up with equal probability if we took a measurement. Which we will now do.</p>');
+
+    this.setControls('<button class="btn btn-p" onclick="S.measureReg2()">Measure second register</button>');
+  },
+
+  measureReg2(){
+    const a=this.a,n=this.n,r=this.r,Q=this.Q;
+    const measuredVal=this.modpow(a,Math.floor(Math.random()*r),n);
+
+    this.log('<p>Measurement: <strong style="color:var(--purple)">'+measuredVal+'</strong></p>');
+    this.log('<p>After the measurement, the probabilities of measuring any other number from register 2 drop to $0$ (and the probability of making the same measurement is now $1$). Also, because the second register is transformed from the first, the first register\'s state also collapses to not give any measurements but those that are consistent with the measurement of register 2 (due to quantum entanglement).</p>');
+    this.log('<p>In other words, measuring register 1 now will only return values $x$ where $'+a+'^x \\bmod '+n+'$ would equal $'+measuredVal+'$. Register 1\'s probability distribution now looks like (higher values truncated for clarity):</p>');
+
+    // Entangled register 1
+    const entData=[];const showN=Math.min(Q,256);
+    for(let x=0;x<showN;x++){
+      const v=this.modpow(a,x,n);
+      entData.push({v:v===measuredVal?1:0,hl:v===measuredVal});
+    }
+    this.log('<p style="font-weight:600;color:var(--navy)">First register after entanglement (truncated)</p>');
+    this.log('<div style="height:140px;margin:8px 0" id="simChart4Wrap"><canvas id="simChart4" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.remath(document.getElementById('simLog'));
+    setTimeout(()=>this.drawChart('simChart4',entData,{title:'Entangled register 1',height:140}),50);
+
+    this.log('<p>It should now be easy to see that the distance between the peaks of probability is the same as the period of $'+a+'^x \\bmod '+n+'$. However, measuring the register now would just return the number represented by one of those peaks randomly. To measure the period (or something close to it), we need to apply a Quantum Fourier Transform to the register.</p>');
+    this.log('<p>Without going too deep into the details of a Fourier Transform: it converts a signal from the "time domain" into the "frequency domain." The periodic spacing in register 1 will become sharp peaks at specific frequencies after the transform.</p>');
+
+    this.setControls('<button class="btn btn-p" onclick="S.applyQFT()">Apply Quantum Fourier Transform</button>');
+  },
+
+  applyQFT(){
+    const a=this.a,n=this.n,r=this.r,Q=this.Q;
+
+    // QFT produces peaks at multiples of Q/r
+    const showN=Math.min(Q,256);
+    const qftData=[];
+    const spikeInterval=Q/r;
+    for(let i=0;i<showN;i++){
+      const nearestSpike=Math.round(i/spikeInterval)*spikeInterval;
+      const isSpike=Math.abs(i-nearestSpike)<1;
+      qftData.push({v:isSpike?1:Math.random()*0.02,hl:isSpike});
+    }
+
+    this.log('<p style="font-weight:600;color:var(--navy)">After Quantum Fourier Transform</p>');
+    this.log('<div style="height:160px;margin:8px 0" id="simChart5Wrap"><canvas id="simChart5" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.remath(document.getElementById('simLog'));
+    setTimeout(()=>this.drawChart('simChart5',qftData,{title:'QFT output',height:160}),50);
+
+    this.log('<p>The peaks are at the places where the amplitude of the specific frequencies of the Fourier series are highest for the register. Specifically, they are at $k \\cdot Q/r$, where $k$ is a random number between $0$ and $r-1$, and $r$ is the period. So measuring register 1 now will give us one specific $k \\cdot Q/r$.</p>');
+    this.log('<p>(As long as we do not get $k = 0$. For the purposes of this simulation, we will fudge the probabilities so we do not. With a real quantum computer, we would just have to try again.)</p>');
+
+    this.setControls('<button class="btn btn-p" onclick="S.measureQFT()">Measure first register</button>');
+  },
+
+  measureQFT(){
+    const a=this.a,n=this.n,r=this.r,Q=this.Q;
+    let k;do{k=Math.floor(Math.random()*r)}while(k===0);
+    const measured=Math.round(k*Q/r);
+
+    this.log('<p>$k \\cdot Q/r$: <strong style="color:var(--purple)">'+measured+'</strong></p>');
+    this.log('<p>Now, all that is left is post-processing, which can be done on a classical computer.</p>');
+    this.log('<h3 style="margin:1.5em 0 .5em;color:var(--navy)">Classical Post-Processing</h3>');
+    this.log('<p>Since the period is not necessarily an even divisor of $Q$, we need to find a fraction with a denominator less than $N$ (the number we are factoring) that is closest to the measured value divided by $Q$. Then, the period should be equal to the denominator.</p>');
+    this.log('<p>Since the period is not necessarily an even divisor of $Q$, we need to find a fraction with a denominator less than $N$ (the number we are factoring) that is closest to the measured value divided by $Q$. Then, the period should be equal to the denominator.</p>');
+
+    // Continued fractions
+    const frac=measured/Q;
+    let bestD=1,bestDist=999;
+    for(let d=1;d<=n;d++){
+      const num=Math.round(frac*d);
+      const dist=Math.abs(num/d-frac);
+      if(dist<bestDist){bestDist=dist;bestD=d}
+    }
+    const foundR=bestD;
+
+    const g=this.gcd(measured,Q);
+    this.log('<div class="math-block">$Q = '+Q+'$<br>$k \\cdot Q/r = '+measured+'$<br>$\\text{measured}/Q = '+measured+'/'+Q);
+    if(g>1)this.log(' = '+(measured/g)+'/'+(Q/g));
+    this.log('$<br>$\\text{period} = '+foundR+'$</div>');
+    this.remath(document.getElementById('simLog'));
+
+    this.log('<p>For some periods, there is a good chance that the period is divisible by $k$, in which case the fraction will be reduced so the denominator is equal to some fraction of the actual period. If the factors are reported wrong below, try running the algorithm again.</p>');
+
+    this.log('<p>From the period, we can determine a factor of $N$, but only if:</p>');
+
+    // Check period
+    let canProceed=true;
+
+    this.log('<ul style="list-style:none;padding:0;margin:8px 0 16px">');
+    if(foundR%2!==0){
+      this.log('<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>the period is even</strong>: $r = '+foundR+'$ is odd!</li>');
+      canProceed=false;
+    }else{
+      this.log('<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>the period is even</strong>: check!</li>');
+    }
+
+    if(canProceed){
+      const aHalf=this.modpow(a,foundR/2,n);
+      if(aHalf===n-1){
+        this.log('<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>$a^{r/2} \\bmod N$ is not equal to $N - 1$</strong>: it equals $'+(n-1)+'$!</li>');
+        canProceed=false;
+      }else{
+        this.log('<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>$a^{r/2} \\bmod N$ is not equal to $N - 1$</strong>: $'+aHalf+' \\neq '+(n-1)+'$, check!</li>');
+      }
+    }
+    this.log('</ul>');
+
+    if(!canProceed){
+      this.log('<p style="color:var(--red);font-weight:600">Looks like this run didn\'t make the cut. Try a different $a$!</p>');
+      this.log('<p>If these numbers do not look right, you will have to run the quantum part of the algorithm again, with different numbers. Press the button below to automatically try again, and hopefully you will get better results.</p>');
+      this.setControls(`
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="S.retryQuantum()">Retry quantum part</button>
+          <button class="btn" onclick="S.retryA()">Try new $a$</button>
+          <button class="btn btn-p" onclick="S.reset()">Try new $N$</button>
+        </div>
+      `);
+      return;
+    }
+
+    // Extract factors
+    const aHalf=this.modpow(a,foundR/2,n);
+    const f1=this.gcd(aHalf+1,n);
+    const f2=this.gcd(aHalf-1,n);
+
+    this.log('<p>With a usable period, the factors of $N$ are simply $\\gcd(a^{r/2} + 1,\\; N)$ and $\\gcd(a^{r/2} - 1,\\; N)$:</p>');
+    this.log('<div class="math-block">$a^{r/2} = '+a+'^{'+(foundR/2)+'} \\bmod '+n+' = '+aHalf+'$<br><br>$\\gcd('+aHalf+' + 1,\\; '+n+') = \\gcd('+(aHalf+1)+',\\; '+n+') = \\textcolor{#7c3aed}{\\mathbf{'+f1+'}}$<br>$\\gcd('+aHalf+' - 1,\\; '+n+') = \\gcd('+(aHalf-1)+',\\; '+n+') = \\textcolor{#7c3aed}{\\mathbf{'+f2+'}}$</div>');
+
+    if((f1===1||f1===n)&&(f2===1||f2===n)){
+      this.log('<p style="color:var(--red)">If these numbers don\'t look right, you will have to run the quantum part of the algorithm again, with different numbers. Press the button below to automatically try again.</p>');
+      this.setControls(`
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="S.retryQuantum()">Retry</button>
+          <button class="btn" onclick="S.retryA()">Try new $a$</button>
+          <button class="btn btn-p" onclick="S.reset()">Try new $N$</button>
+        </div>
+      `);
+    }else{
+      const goodF=(f1!==1&&f1!==n)?f1:f2;
+      const otherF=n/goodF;
+      this.log('<div class="result"><span>$$'+n+' = '+Math.min(goodF,otherF)+' \\times '+Math.max(goodF,otherF)+'$$</span></div>');
+      this.log('<p style="color:var(--purple);font-weight:600;text-align:center;margin-top:4px">You got through Shor\'s algorithm!</p>');
+      this.setControls(`
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="S.retryA()">Try new $a$</button>
+          <button class="btn btn-p" onclick="S.reset()">Try new $N$</button>
+        </div>
+      `);
+    }
+    this.remath(document.getElementById('simLog'));
+  },
+
+  retryQuantum(){
+    // Re-run from the QFT measurement
+    this.applyQFT();
+  },
+
+  retryA(){
+    this.clearLog();
+    this.start();
+  },
+
+  reset(){
+    this.clearLog();
+    this.setControls(`
+      <p style="font-weight:600;color:var(--navy);margin-bottom:10px;font-size:1.05rem">Number to factor</p>
+      <div class="calc" style="margin:0 0 8px">
+        <label>N = <input type="number" id="simN" value="15" min="4" max="999" style="width:100px"></label>
+        <button class="btn btn-p" onclick="S.start()">Factor</button>
+      </div>
+      <p style="font-size:.82rem;color:var(--text-light)">Try: 15, 21, 33, 35, 55, 77, 91, 143, 221, 299, 323</p>
+    `);
+  }
+};
+</script>
+</body>
+</html>
+
