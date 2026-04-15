@@ -523,93 +523,132 @@ const S = {
     return true;
   },
   isPrimePower(n){for(let p=2;p*p<=n;p++){if(n%p===0){let v=n;while(v%p===0)v/=p;if(v===1)return true}}return false},
-
-  log(html){document.getElementById('simLog').innerHTML+=html;this.remath(document.getElementById('simLog'))},
-  clearLog(){document.getElementById('simLog').innerHTML=''},
+  
+  log(html){
+    document.getElementById('simLog').insertAdjacentHTML('beforeend', html);
+    // Only render math in the newly added content
+    const log = document.getElementById('simLog');
+    const lastChild = log.lastElementChild;
+    if(lastChild) this.remath(lastChild);
+  },
+  clearLog(){document.getElementById('simLog').innerHTML='';this.chartQueue=[]},
   remath(el){renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})},
-
+  
+  chartQueue:[],
+  
   drawChart(canvasId,data,opts={}){
-    const wrap=document.getElementById(canvasId).parentElement;
+    // Store for redrawing
+    this.chartQueue.push({canvasId,data,opts});
+    this._renderChart(canvasId,data,opts);
+  },
+  
+  _renderChart(canvasId,data,opts){
     const canvas=document.getElementById(canvasId);
-    const W=wrap.clientWidth;const H=opts.height||160;
+    if(!canvas)return;
+    const wrap=canvas.parentElement;
+    if(!wrap)return;
+    const W=wrap.clientWidth;
+    if(W<10)return;
+    const H=opts.height||160;
     canvas.width=W*2;canvas.height=H*2;canvas.style.height=H+'px';
     const ctx=canvas.getContext('2d');ctx.scale(2,2);
     ctx.fillStyle='#f8f7fc';ctx.fillRect(0,0,W,H);
+    
+    // Title at top, outside the chart area
+    const titleH = opts.title ? 22 : 0;
+    if(opts.title){
+      ctx.fillStyle='#5e5485';ctx.font='bold 10px system-ui';ctx.textAlign='left';
+      ctx.fillText(opts.title, 12, 14);
+    }
+    
     const maxV=Math.max(...data.map(d=>d.v),0.001);
-    const pad=30;const chartW=W-pad*2;const chartH=H-40;
+    const pad=30;
+    const topPad = titleH + 8;
+    const chartH=H - topPad - 28; // space for title above and labels below
+    const chartW=W-pad*2;
     const barW=Math.max(1,chartW/data.length-1);
-    // axis
+    
+    // Axis line
     ctx.strokeStyle='#e5e1ef';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(pad,chartH+5);ctx.lineTo(W-pad,chartH+5);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(pad, topPad+chartH);ctx.lineTo(W-pad, topPad+chartH);ctx.stroke();
+    
+    // Bars
     for(let i=0;i<data.length;i++){
       const h=(data[i].v/maxV)*chartH;
       const x=pad+i*(barW+1);
       ctx.fillStyle=data[i].hl?'#7c3aed':'#c4b5fd';
-      ctx.fillRect(x,chartH+5-h,barW,h);
+      if(h>0.5) ctx.fillRect(x, topPad+chartH-h, barW, h);
     }
-    // labels
+    
+    // X-axis labels
     ctx.fillStyle='#9590ac';ctx.font='9px system-ui';ctx.textAlign='center';
     if(data.length<=64){
       const step=Math.max(1,Math.floor(data.length/16));
       for(let i=0;i<data.length;i+=step){
         const x=pad+i*(barW+1)+barW/2;
-        ctx.fillText(opts.labels?opts.labels[i]:i,x,chartH+18);
+        ctx.fillText(opts.labels?opts.labels[i]:i, x, topPad+chartH+14);
       }
     }else{
       for(let i=0;i<data.length;i+=Math.floor(data.length/8)){
-        const x=pad+i*(barW+1)+barW/2;ctx.fillText(i,x,chartH+18);
+        const x=pad+i*(barW+1)+barW/2;
+        ctx.fillText(i, x, topPad+chartH+14);
       }
     }
-    if(opts.title){ctx.fillStyle='#5e5485';ctx.font='bold 10px system-ui';ctx.textAlign='left';ctx.fillText(opts.title,pad,14)}
+  },
+  
+  redrawAllCharts(){
+    for(const c of this.chartQueue){
+      this._renderChart(c.canvasId,c.data,c.opts);
+    }
   },
 
   setControls(html){document.getElementById('simControls').innerHTML=html;this.remath(document.getElementById('simControls'))},
-
+  
   start(){
     const n=parseInt(document.getElementById('simN').value);
     if(isNaN(n)||n<4){this.log('<p style="color:var(--red)">Please enter a number of 4 or more.</p>');return}
     this.clearLog();
     this.n=n;
-
+    
     // Validation
     const isEven = (n % 2 === 0);
     const prime = this.isPrime(n);
     const primePow = this.isPrimePower(n);
     const valid = !isEven && !prime && !primePow;
-
+    
     let checks='<div style="margin:12px 0;padding:20px 24px;background:var(--code-bg);border-radius:10px;border:1px solid var(--border-light)">';
     checks+='<p style="font-weight:600;color:var(--navy);margin-bottom:10px">In order for Shor\'s algorithm to work, $N$ has to be:</p>';
     checks+='<ul style="list-style:none;padding:0;margin:0 0 4px">';
-
+    
     // Check 1: composite (not prime)
     if(prime){checks+='<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>composite</strong> (not prime): It\'s prime!</li>'}
     else{checks+='<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>composite</strong> (not prime): check!</li>'}
-
+    
     // Check 2: not a power of a prime
     if(!prime && primePow){checks+='<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>not a power of a prime</strong>: It\'s a prime power!</li>'}
     else if(!prime){checks+='<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>not a power of a prime</strong>: check!</li>'}
-
+    
     // Check 3: odd
     if(isEven){checks+='<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>odd</strong>: It\'s even! Divide by 2 first.</li>'}
     else{checks+='<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>odd</strong>: check!</li>'}
-
+    
     checks+='</ul></div>';
     this.log(checks);
-
+    
     if(!valid){
       this.log('<p style="color:var(--red);font-weight:600;margin-top:8px">Uh-oh, your number didn\'t pass the test. Try another number!</p>');
       this.remath(document.getElementById('simLog'));
       return;
     }
-
+    
     this.log('<p>Thus, $N = '+n+'$ is the product of two coprime numbers greater than 1. As a consequence of the Chinese Remainder Theorem, $1$ has at least four distinct square roots modulo $N$, two of them being $1$ and $-1$. The aim of the algorithm is to find a square root $b$ of $1$, other than $1$ and $-1$; such a $b$ will lead to a factorization of $N$.</p>');
     this.log('<p>In turn, finding such a $b$ is reduced to finding an element $a$ of even period with another certain additional property. The quantum algorithm is used for finding the period of randomly chosen elements $a$, as order-finding is a hard problem on a classical computer.</p>');
     this.log('<h3 style="margin:1.5em 0 .5em;color:var(--navy)">Classical Part</h3>');
     this.log('<p>Now, a number $a$ between $1$ and $N$ exclusive is randomly picked. For illustration, you can pick it yourself, or hit the "Randomize" button to have a value generated for you. Press "Continue" to continue the algorithm.</p>');
-
+    
     let aVal=2+Math.floor(Math.random()*(n-3));
     while(this.gcd(aVal,n)!==1&&aVal<n-1)aVal++;
-
+    
     this.setControls(`
       <div class="calc" style="margin:0 0 8px">
         <label>a = <input type="number" id="simA" value="${aVal}" min="2" max="${n-1}" style="width:80px"></label>
@@ -618,12 +657,12 @@ const S = {
       </div>
     `);
   },
-
+  
   randomA(){
     const n=this.n;let a;do{a=2+Math.floor(Math.random()*(n-3))}while(this.gcd(a,n)!==1);
     document.getElementById('simA').value=a;
   },
-
+  
   checkA(){
     const a=parseInt(document.getElementById('simA').value);
     const n=this.n;
@@ -632,7 +671,7 @@ const S = {
     const g=this.gcd(a,n);
     this.log('<p>Now, $\\gcd(a, N)$ is calculated using the Euclidean algorithm.</p>');
     this.log('<p>$\\gcd('+a+', '+n+') = '+g+'$</p>');
-
+    
     if(g!==1){
       this.log('<p>The result of the gcd is not $1$, so <strong style="color:var(--purple)">'+g+'</strong> is itself a non-trivial factor of $'+n+'$. You got lucky!</p>');
       this.log('<div class="result"><span>$$'+n+' = '+g+' \\times '+(n/g)+'$$</span></div>');
@@ -640,117 +679,120 @@ const S = {
       this.remath(document.getElementById('simLog'));
       return;
     }
-
+    
     this.log('<p>The gcd is $1$, so $a$ and $N$ are coprime. Otherwise, the result would itself be a non-trivial factor of $N$. Now we need to find the period of $'+a+'^x \\bmod '+n+'$. This is where the quantum part of the algorithm comes in.</p>');
     this.log('<p>A graph of $'+a+'^x \\bmod '+n+'$ for a few values is shown below. With small numbers, it is easy to see the periodicity:</p>');
-
+    
     // Show a^x mod n graph
     const r=this.findPeriod(a,n);this.r=r;
     const numPts=Math.min(r*4,80);
     const vals=[];for(let x=0;x<numPts;x++)vals.push({v:this.modpow(a,x,n),hl:x%r===0});
-
+    
     this.log('<p style="font-weight:600;color:var(--navy);margin-top:1em">$'+a+'^x \\bmod '+n+'$</p>');
     this.log('<div style="height:160px;margin:8px 0" id="simChart1Wrap"><canvas id="simChart1" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
     this.remath(document.getElementById('simLog'));
-    setTimeout(()=>this.drawChart('simChart1',vals,{title:'a^x mod n',height:160}),50);
-
+    requestAnimationFrame(()=>{this.drawChart('simChart1',vals,{title:'a^x mod n',height:160});});
+    
     this.log('<p>However, we are not going for simplicity, so it is time for the quantum part!</p>');
-
+    
     // Quantum part
     this.log('<h3 style="margin:1.5em 0 .5em;color:var(--navy)">Quantum Part</h3>');
     let Q=1,q=0;while(Q<n*n){Q*=2;q++}
     this.Q=Q;this.q=q;
-
+    
     this.log('<p>First, we need a quantum register big enough to hold $Q$ numbers, such that $N^2 \\leq Q \\leq 2N^2$. This gives enough room to see the periodicity of $a^x \\bmod N$, even if the period is close to $N/2$. To do this, we need a $'+q+'$-qubit wide quantum register.</p>');
     this.log('<p>For $'+n+'$, we need $'+q+'$ qubits ($Q = '+Q+'$). These qubits can represent the numbers from $0$ to $'+(Q-1)+'$. They are initialized so that measuring the state of the quantum register gives us a random number from $0$ to $'+(Q-1)+'$ with equal probability.</p>');
     this.log('<p>To illustrate the state of the quantum register, here is a graph of the probability density function of measuring the register, where the x-axis represents the value that would be measured. With a real quantum register, a graph like this could never actually be measured, since taking one reading would collapse all future readings.</p>');
-
+    
     // Initial uniform register
     const uniData=[];for(let i=0;i<Math.min(Q,256);i++)uniData.push({v:1,hl:false});
     this.log('<p style="font-weight:600;color:var(--navy)">Initial quantum register (probability distribution)</p>');
     this.log('<div style="height:120px;margin:8px 0" id="simChart2Wrap"><canvas id="simChart2" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
     this.remath(document.getElementById('simLog'));
-    setTimeout(()=>this.drawChart('simChart2',uniData,{title:'Uniform superposition',height:120}),100);
-
+    requestAnimationFrame(()=>{this.drawChart('simChart2',uniData,{title:'Uniform superposition',height:120});});
+    
     this.log('<p>Of course, it is a pretty boring graph, if everything went right.</p>');
     this.log('<p>It gets more interesting now, though. We are going to apply a transform to the register based on the $'+a+'^x \\bmod '+n+'$ function, where $x$ is represented by each possible state of the quantum register. The remarkable thing with a real quantum computer is that every single calculation of $a^x \\bmod N$ is done in parallel by the property of superposition. The result is stored within a second quantum register:</p>');
-
+    
     // Transformed register (only r distinct values have nonzero probability)
     const transData=[];const modVals={};
     for(let x=0;x<Math.min(Q,256);x++){const v=this.modpow(a,x,n);modVals[v]=(modVals[v]||0)+1}
     const distinctVals=Object.keys(modVals).map(Number).sort((a,b)=>a-b);
     const transArr=[];for(let v=0;v<n;v++)transArr.push({v:modVals[v]||0,hl:(modVals[v]||0)>0});
-
+    
     this.log('<p style="font-weight:600;color:var(--navy)">Second register after modular exponentiation</p>');
-    this.log('<div style="height:140px;margin:8px 0" id="simChart3Wrap"><canvas id="simChart3" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.log('<div style="height:150px;margin:8px 0" id="simChart3Wrap"><canvas id="simChart3" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
     this.remath(document.getElementById('simLog'));
-    setTimeout(()=>this.drawChart('simChart3',transArr,{title:'a^x mod N values',height:140}),150);
-
+    requestAnimationFrame(()=>{this.drawChart('simChart3',transArr,{title:'a^x mod N values',height:150});});
+    
     this.log('<p>There should now be only a few peaks, with the probability of any other state at $0$. This is because after taking $a^x \\bmod N$ for every $x$, the periodicity of that function means only '+distinctVals.length+' values (the cycle $\\{'+distinctVals.join(', ')+'\\}$) will show up with equal probability if we took a measurement. Which we will now do.</p>');
-
+    
     this.setControls('<button class="btn btn-p" onclick="S.measureReg2()">Measure second register</button>');
   },
-
+  
   measureReg2(){
+    requestAnimationFrame(()=>this.redrawAllCharts());
     const a=this.a,n=this.n,r=this.r,Q=this.Q;
     const measuredVal=this.modpow(a,Math.floor(Math.random()*r),n);
-
+    
     this.log('<p>Measurement: <strong style="color:var(--purple)">'+measuredVal+'</strong></p>');
     this.log('<p>After the measurement, the probabilities of measuring any other number from register 2 drop to $0$ (and the probability of making the same measurement is now $1$). Also, because the second register is transformed from the first, the first register\'s state also collapses to not give any measurements but those that are consistent with the measurement of register 2 (due to quantum entanglement).</p>');
     this.log('<p>In other words, measuring register 1 now will only return values $x$ where $'+a+'^x \\bmod '+n+'$ would equal $'+measuredVal+'$. Register 1\'s probability distribution now looks like (higher values truncated for clarity):</p>');
-
-    // Entangled register 1
-    const entData=[];const showN=Math.min(Q,256);
+    
+    // Entangled register 1 - truncated for clarity
+    const entData=[];const showN=Math.min(Q,64); // Show fewer points so bars are visible
     for(let x=0;x<showN;x++){
       const v=this.modpow(a,x,n);
       entData.push({v:v===measuredVal?1:0,hl:v===measuredVal});
     }
-    this.log('<p style="font-weight:600;color:var(--navy)">First register after entanglement (truncated)</p>');
-    this.log('<div style="height:140px;margin:8px 0" id="simChart4Wrap"><canvas id="simChart4" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.log('<p style="font-weight:600;color:var(--navy)">First register after entanglement (showing first '+showN+' of '+Q+' states)</p>');
+    this.log('<div style="height:160px;margin:8px 0" id="simChart4Wrap"><canvas id="simChart4" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
     this.remath(document.getElementById('simLog'));
-    setTimeout(()=>this.drawChart('simChart4',entData,{title:'Entangled register 1',height:140}),50);
-
+    requestAnimationFrame(()=>{this.drawChart('simChart4',entData,{title:'Entangled register 1',height:160});this.redrawAllCharts();});
+    
     this.log('<p>It should now be easy to see that the distance between the peaks of probability is the same as the period of $'+a+'^x \\bmod '+n+'$. However, measuring the register now would just return the number represented by one of those peaks randomly. To measure the period (or something close to it), we need to apply a Quantum Fourier Transform to the register.</p>');
     this.log('<p>Without going too deep into the details of a Fourier Transform: it converts a signal from the "time domain" into the "frequency domain." The periodic spacing in register 1 will become sharp peaks at specific frequencies after the transform.</p>');
-
+    
     this.setControls('<button class="btn btn-p" onclick="S.applyQFT()">Apply Quantum Fourier Transform</button>');
   },
-
+  
   applyQFT(){
+    requestAnimationFrame(()=>this.redrawAllCharts());
     const a=this.a,n=this.n,r=this.r,Q=this.Q;
-
+    
     // QFT produces peaks at multiples of Q/r
-    const showN=Math.min(Q,256);
+    const showN=Math.min(Q,128);
     const qftData=[];
     const spikeInterval=Q/r;
     for(let i=0;i<showN;i++){
       const nearestSpike=Math.round(i/spikeInterval)*spikeInterval;
-      const isSpike=Math.abs(i-nearestSpike)<1;
-      qftData.push({v:isSpike?1:Math.random()*0.02,hl:isSpike});
+      const isSpike=Math.abs(i-nearestSpike)<1.5;
+      qftData.push({v:isSpike?1:0,hl:isSpike});
     }
-
+    
     this.log('<p style="font-weight:600;color:var(--navy)">After Quantum Fourier Transform</p>');
-    this.log('<div style="height:160px;margin:8px 0" id="simChart5Wrap"><canvas id="simChart5" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
+    this.log('<div style="height:180px;margin:8px 0" id="simChart5Wrap"><canvas id="simChart5" style="width:100%;height:100%;border-radius:8px;background:var(--code-bg)"></canvas></div>');
     this.remath(document.getElementById('simLog'));
-    setTimeout(()=>this.drawChart('simChart5',qftData,{title:'QFT output',height:160}),50);
-
+    requestAnimationFrame(()=>{this.drawChart('simChart5',qftData,{title:'QFT output',height:180});this.redrawAllCharts();});
+    
     this.log('<p>The peaks are at the places where the amplitude of the specific frequencies of the Fourier series are highest for the register. Specifically, they are at $k \\cdot Q/r$, where $k$ is a random number between $0$ and $r-1$, and $r$ is the period. So measuring register 1 now will give us one specific $k \\cdot Q/r$.</p>');
     this.log('<p>(As long as we do not get $k = 0$. For the purposes of this simulation, we will fudge the probabilities so we do not. With a real quantum computer, we would just have to try again.)</p>');
-
+    
     this.setControls('<button class="btn btn-p" onclick="S.measureQFT()">Measure first register</button>');
   },
-
+  
   measureQFT(){
+    requestAnimationFrame(()=>this.redrawAllCharts());
     const a=this.a,n=this.n,r=this.r,Q=this.Q;
     let k;do{k=Math.floor(Math.random()*r)}while(k===0);
     const measured=Math.round(k*Q/r);
-
+    
     this.log('<p>$k \\cdot Q/r$: <strong style="color:var(--purple)">'+measured+'</strong></p>');
     this.log('<p>Now, all that is left is post-processing, which can be done on a classical computer.</p>');
     this.log('<h3 style="margin:1.5em 0 .5em;color:var(--navy)">Classical Post-Processing</h3>');
     this.log('<p>Since the period is not necessarily an even divisor of $Q$, we need to find a fraction with a denominator less than $N$ (the number we are factoring) that is closest to the measured value divided by $Q$. Then, the period should be equal to the denominator.</p>');
     this.log('<p>Since the period is not necessarily an even divisor of $Q$, we need to find a fraction with a denominator less than $N$ (the number we are factoring) that is closest to the measured value divided by $Q$. Then, the period should be equal to the denominator.</p>');
-
+    
     // Continued fractions
     const frac=measured/Q;
     let bestD=1,bestDist=999;
@@ -760,20 +802,20 @@ const S = {
       if(dist<bestDist){bestDist=dist;bestD=d}
     }
     const foundR=bestD;
-
+    
     const g=this.gcd(measured,Q);
     this.log('<div class="math-block">$Q = '+Q+'$<br>$k \\cdot Q/r = '+measured+'$<br>$\\text{measured}/Q = '+measured+'/'+Q);
     if(g>1)this.log(' = '+(measured/g)+'/'+(Q/g));
     this.log('$<br>$\\text{period} = '+foundR+'$</div>');
     this.remath(document.getElementById('simLog'));
-
+    
     this.log('<p>For some periods, there is a good chance that the period is divisible by $k$, in which case the fraction will be reduced so the denominator is equal to some fraction of the actual period. If the factors are reported wrong below, try running the algorithm again.</p>');
-
+    
     this.log('<p>From the period, we can determine a factor of $N$, but only if:</p>');
-
+    
     // Check period
     let canProceed=true;
-
+    
     this.log('<ul style="list-style:none;padding:0;margin:8px 0 16px">');
     if(foundR%2!==0){
       this.log('<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>the period is even</strong>: $r = '+foundR+'$ is odd!</li>');
@@ -781,7 +823,7 @@ const S = {
     }else{
       this.log('<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>the period is even</strong>: check!</li>');
     }
-
+    
     if(canProceed){
       const aHalf=this.modpow(a,foundR/2,n);
       if(aHalf===n-1){
@@ -792,7 +834,7 @@ const S = {
       }
     }
     this.log('</ul>');
-
+    
     if(!canProceed){
       this.log('<p style="color:var(--red);font-weight:600">Looks like this run didn\'t make the cut. Try a different $a$!</p>');
       this.log('<p>If these numbers do not look right, you will have to run the quantum part of the algorithm again, with different numbers. Press the button below to automatically try again, and hopefully you will get better results.</p>');
@@ -805,15 +847,15 @@ const S = {
       `);
       return;
     }
-
+    
     // Extract factors
     const aHalf=this.modpow(a,foundR/2,n);
     const f1=this.gcd(aHalf+1,n);
     const f2=this.gcd(aHalf-1,n);
-
+    
     this.log('<p>With a usable period, the factors of $N$ are simply $\\gcd(a^{r/2} + 1,\\; N)$ and $\\gcd(a^{r/2} - 1,\\; N)$:</p>');
     this.log('<div class="math-block">$a^{r/2} = '+a+'^{'+(foundR/2)+'} \\bmod '+n+' = '+aHalf+'$<br><br>$\\gcd('+aHalf+' + 1,\\; '+n+') = \\gcd('+(aHalf+1)+',\\; '+n+') = \\textcolor{#7c3aed}{\\mathbf{'+f1+'}}$<br>$\\gcd('+aHalf+' - 1,\\; '+n+') = \\gcd('+(aHalf-1)+',\\; '+n+') = \\textcolor{#7c3aed}{\\mathbf{'+f2+'}}$</div>');
-
+    
     if((f1===1||f1===n)&&(f2===1||f2===n)){
       this.log('<p style="color:var(--red)">If these numbers don\'t look right, you will have to run the quantum part of the algorithm again, with different numbers. Press the button below to automatically try again.</p>');
       this.setControls(`
@@ -837,17 +879,17 @@ const S = {
     }
     this.remath(document.getElementById('simLog'));
   },
-
+  
   retryQuantum(){
     // Re-run from the QFT measurement
     this.applyQFT();
   },
-
+  
   retryA(){
     this.clearLog();
     this.start();
   },
-
+  
   reset(){
     this.clearLog();
     this.setControls(`
@@ -863,4 +905,3 @@ const S = {
 </script>
 </body>
 </html>
-
