@@ -62,6 +62,49 @@ blockquote p{margin-bottom:.3em}
 .w-body{padding:28px}
 .w-foot{padding:12px 28px;border-top:1px solid var(--border-light);font-size:.82rem;color:var(--text-light);font-style:italic;text-align:center}
 
+/* Interactive circuit */
+.icirc-wrap{display:flex;flex-direction:column;gap:0}
+.icirc-svg{cursor:default}
+.icirc-svg .gate-grp{cursor:pointer;transition:opacity .15s}
+.icirc-svg .gate-grp:hover{opacity:.65}
+.icirc-svg .gate-grp.active rect{stroke-width:2.5;stroke:#7c3aed;filter:drop-shadow(0 2px 6px rgba(124,58,237,.35))}
+.icirc-svg .gate-grp.active circle{stroke:#7c3aed;stroke-width:2}
+.icirc-info{padding:18px 24px;background:var(--code-bg);border-top:1px solid var(--border-light);font-size:.92rem;line-height:1.65;min-height:120px}
+.icirc-info-title{font-family:var(--sans);font-size:.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple);margin-bottom:8px}
+.icirc-info-body{color:var(--text-body)}
+.icirc-info-body code{font-family:var(--mono);font-size:.85rem;background:white;padding:1px 6px;border-radius:4px;color:var(--purple)}
+.icirc-prompt{color:var(--text-light);font-style:italic}
+
+/* Generalized interactive circuit (smaller sub-circuits) */
+.ic-svg .ic-grp{cursor:pointer;transition:opacity .15s}
+.ic-svg .ic-grp:hover{opacity:.6}
+.ic-svg .ic-grp.active rect{stroke-width:2.5;stroke:#7c3aed;filter:drop-shadow(0 1px 4px rgba(124,58,237,.35))}
+.ic-svg .ic-grp.active circle{stroke:#7c3aed;stroke-width:2}
+.ic-svg .ic-grp.active line{stroke:#7c3aed}
+.ic-info{padding:14px 20px;background:var(--code-bg);border-top:1px solid var(--border-light);font-size:.88rem;line-height:1.6;min-height:80px}
+.ic-info-title{font-family:var(--sans);font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple);margin-bottom:6px}
+.ic-info-body{color:var(--text-body)}
+.ic-prompt{color:var(--text-light);font-style:italic;font-size:.85rem}
+
+/* Aside / analogy callout box */
+.aside{margin:1.6em 0;padding:20px 24px;background:linear-gradient(180deg,#faf8ff 0%,#f5f0ff 100%);border-left:3px solid var(--purple);border-radius:0 8px 8px 0}
+.aside-label{font-family:var(--sans);font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple);margin-bottom:8px}
+.aside p{margin-bottom:.8em}
+.aside p:last-child{margin-bottom:0}
+
+/* Footnote-style citations */
+sup.cite{font-family:var(--sans);font-size:.65rem;font-weight:600;color:var(--purple);vertical-align:super;line-height:0;padding:0 1px}
+sup.cite a{color:var(--purple);text-decoration:none;border-bottom:1px dotted var(--purple)}
+sup.cite a:hover{color:var(--purple-mid);border-bottom-style:solid}
+
+/* References list at the bottom */
+.refs{margin-top:48px;padding-top:32px;border-top:1px solid var(--border)}
+.refs-title{font-family:var(--sans);font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-mid);margin-bottom:16px}
+.refs ol{padding-left:28px;margin:0}
+.refs li{font-size:.82rem;color:var(--text-mid);line-height:1.55;margin-bottom:8px;padding-left:4px}
+.refs li a{color:var(--purple);text-decoration:none;border-bottom:1px solid transparent}
+.refs li a:hover{border-bottom-color:var(--purple)}
+
 .mt{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.82rem}
 .mt th{text-align:left;padding:10px 14px;border-bottom:2px solid var(--border);font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);font-weight:600}
 .mt td{padding:10px 14px;border-bottom:1px solid var(--border-light);color:var(--text-mid)}
@@ -153,10 +196,12 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
   <a href="#s-cycle" class="sidebar-link" data-section="s-cycle">Seeing the cycle</a>
   <a href="#s-quantum" class="sidebar-link" data-section="s-quantum">The quantum computer</a>
   <a href="#s-phase" class="sidebar-link" data-section="s-phase">Phase estimation</a>
+  <a href="#s-circuit" class="sidebar-link" data-section="s-circuit">Building the circuit</a>
   <a href="#s-qft" class="sidebar-link" data-section="s-qft">QFT measurement</a>
   <a href="#s-rsa" class="sidebar-link" data-section="s-rsa">RSA encryption</a>
   <a href="#s-full" class="sidebar-link" data-section="s-full">Complete algorithm</a>
   <a href="#s-sim" class="sidebar-link" data-section="s-sim">Interactive simulator</a>
+  <a href="#s-errors" class="sidebar-link" data-section="s-errors">Real qubits have errors</a>
   <a href="#s-summary" class="sidebar-link" data-section="s-summary">Looking back</a>
 </nav>
 
@@ -166,7 +211,7 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 <p>Every time you buy something online, send a private message, or log into your bank, your security depends on a single mathematical bet: that nobody can efficiently undo multiplication.</p>
 <p>Multiplying two prime numbers is easy. Any computer can compute $61 \times 53 = 3{,}233$ in a fraction of a second. But going the other direction is surprisingly difficult. If I hand you the number $3{,}233$ and ask you to find its prime factors, you have to search. For this small number the search is quick. But for numbers with hundreds of digits, the kind used in real encryption, the search space is so vast that no known classical algorithm can finish before the sun burns out.</p>
 <p>This asymmetry isn't some minor technicality. It's the foundation of RSA encryption, the system that protects most of the internet. The entire edifice of modern cryptography rests on the belief that factoring large numbers is effectively impossible.</p>
-<p>In 1994, the mathematician Peter Shor showed that this belief has a crack. He discovered a quantum algorithm that factors numbers exponentially faster than any known classical method. What makes Shor's result so striking isn't brute force. The algorithm doesn't simply try factors faster. Instead, it transforms the factoring problem into something completely different: finding the <strong>period</strong> of a repeating mathematical function. And period-finding turns out to be something quantum computers do remarkably well.</p>
+<p>In 1994, the mathematician Peter Shor showed that this belief has a crack.<sup class="cite"><a href="#ref-shor">2</a></sup> He discovered a quantum algorithm that factors numbers exponentially faster than any known classical method. What makes Shor's result so striking isn't brute force. The algorithm doesn't simply try factors faster. Instead, it transforms the factoring problem into something completely different: finding the <strong>period</strong> of a repeating mathematical function. And period-finding turns out to be something quantum computers do remarkably well.</p>
 
 <h2 id="s-key">The key idea: factoring reduces to period-finding</h2>
 <p>If we want a fast quantum factoring algorithm, we can't just "try all possible divisors in parallel." That's a common misconception about quantum computing. If you put all possible divisors into superposition and then measured, you'd just get a random divisor, which almost certainly wouldn't be the right one.</p>
@@ -175,7 +220,7 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 <div class="math-block">$$a^0 \bmod N,\quad a^1 \bmod N,\quad a^2 \bmod N,\quad a^3 \bmod N,\quad \ldots$$</div>
 <p>If you haven't seen modular arithmetic before: $a \bmod N$ simply means the remainder when you divide $a$ by $N$. So $49 \bmod 15 = 4$, because $49 \div 15 = 3$ with remainder $4$.</p>
 <p>The remarkable fact, guaranteed by number theory, is that <strong>this sequence always repeats</strong>. There is some smallest positive integer $r$, called the <em>period</em> or <em>order</em>, such that $a^r \equiv 1 \pmod{N}$, and then the entire pattern starts over from the beginning.</p>
-<p>Why does the period tell us anything about the factors? There's a beautiful result, discovered by Euler in the 1760s: if $N = p \times q$ for primes $p$ and $q$, then the period $r$ must evenly divide $(p-1)(q-1)$. So for $N = 15$ with $p = 3$ and $q = 5$, we get $(p-1)(q-1) = 8$, and indeed the period $r = 4$ divides $8$. The period is leaking information about the prime factors.</p>
+<p>Why does the period tell us anything about the factors? There's a beautiful result, discovered by Euler in the 1760s: if $N = p \times q$ for primes $p$ and $q$, then the period $r$ must evenly divide $(p-1)(q-1)$.<sup class="cite"><a href="#ref-aaronson">1</a></sup> So for $N = 15$ with $p = 3$ and $q = 5$, we get $(p-1)(q-1) = 8$, and indeed the period $r = 4$ divides $8$. The period is leaking information about the prime factors.</p>
 <p>More concretely, once you know $r$ and it happens to be even, the factors of $N$ can usually be found by a simple computation:</p>
 <div class="math-block">$$\gcd\!\left(a^{r/2} - 1,\; N\right) \qquad \text{and} \qquad \gcd\!\left(a^{r/2} + 1,\; N\right)$$</div>
 <p>Why does this work? Since $a^r \equiv 1 \pmod{N}$, we know that $N$ divides $a^r - 1$. If $r$ is even, we can write $a^r - 1 = (a^{r/2} - 1)(a^{r/2} + 1)$. So $N$ divides this product. If neither factor is itself divisible by $N$, then $N$ must split its prime factors between the two terms. And $\gcd$ extracts them.</p>
@@ -270,7 +315,7 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 <h2 id="s-quantum">Where the quantum computer comes in</h2>
 <p>At this point you might be wondering: we just found the period by computing a table. Why on earth do we need a quantum computer?</p>
 <p>The answer is scale. For $N = 15$, the period is $4$, and we only needed to evaluate four values to find it. But for a number with 600 digits, the period could be comparably enormous. A classical computer would need to evaluate a staggering number of modular exponentiations, one after another, to find where the pattern repeats. No classical shortcut is known.</p>
-<p>Here's the crucial subtlety, though. A quantum computer can't just "try all divisors in parallel" and magically pick the right one. That's a common misconception. If you put all possible values into superposition and then measured, you'd just get a random value, which is useless. What a quantum computer <em>can</em> do is detect a <strong>global property</strong> of the entire sequence: its period. The period isn't hiding in any single value. It's a pattern that only emerges from looking at all the values together. And that's exactly the kind of structure quantum interference can extract.</p>
+<p>Here's the crucial subtlety, though. A quantum computer can't just "try all divisors in parallel" and magically pick the right one. That's a common misconception. If you put all possible values into superposition and then measured, you'd just get a random value, which is useless. What a quantum computer <em>can</em> do is detect a <strong>global property</strong> of the entire sequence: its period.<sup class="cite"><a href="#ref-aaronson">1</a></sup> The period isn't hiding in any single value. It's a pattern that only emerges from looking at all the values together. And that's exactly the kind of structure quantum interference can extract.</p>
 <p>To understand how, we need to introduce a few ideas from quantum mechanics. Don't worry if these are new to you. We'll build up the intuition step by step.</p>
 
 <h3>A brief guide to quantum notation</h3>
@@ -278,13 +323,131 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 <p>A classical computer stores a definite value: a register might hold the number 5. A quantum register can be in a <strong>superposition</strong> of many values at once. This is often written as $|0\rangle + |1\rangle + |2\rangle + \ldots$, meaning the register is simultaneously in all of those states. When you measure a register in superposition, you get one of those values at random, and the superposition collapses.</p>
 <p>Two more ideas will be important. <strong>Interference</strong> is what happens when quantum states combine. Just like sound waves, quantum amplitudes can reinforce each other (constructive interference, making an outcome more likely) or cancel each other out (destructive interference, making it less likely). And <strong>entanglement</strong> is a correlation between two quantum registers: measuring one can instantly affect what you'd see if you measured the other.</p>
 <p>With that vocabulary in hand, here's how the quantum part of Shor's algorithm works. Rather than computing $a^x \bmod N$ for each value of $x$ one at a time, the quantum computer places all possible values of $x$ into superposition and evaluates the function for all of them at once. Then it applies the Quantum Fourier Transform (QFT), which uses interference to extract the period from the pattern.</p>
+
+<div class="aside">
+<div class="aside-label">An analogy for the QFT</div>
+<p>Scott Aaronson offers a wonderful intuition for what the QFT actually does.<sup class="cite"><a href="#ref-aaronson">1</a></sup> Imagine a wall covered in analog clocks. One clock makes a full revolution every 17 hours, another every 26 hours, another every 24.7 hours, and so on for every possible period you can imagine. Beneath each clock is a posterboard with a thumbtack pinned in the middle.</p>
+<p>Now imagine someone keeping a strange schedule, waking up at irregular times. Every time they wake up, they walk along the wall and move each thumbtack one inch in whatever direction the corresponding clock's hand is pointing.</p>
+<p>What happens to the thumbtacks? For most clocks, the directions are essentially random across many days, so the thumbtacks drift around but stay near the middle. The pushes cancel out. But for the clock whose period <em>matches</em> the person's actual schedule, the hand always points in the same direction at wake-up time. So that one thumbtack travels far from the center, in a straight line.</p>
+<p>By looking at which thumbtack ends up farthest from the middle, you discover the person's hidden schedule. That is exactly what the QFT does. The "thumbtacks" are the quantum amplitudes; for the wrong period, contributions from different parts of the superposition point in different directions and cancel via destructive interference; for the right period, they all point the same way and add up constructively. Measurement then samples the loud peak.</p>
+</div>
+
 <p>Step through each stage below:</p>
 <div class="widget rv">
   <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Step-through: The quantum subroutine</span></div>
   <div class="w-body"><div class="tabs" id="qTabs"></div><div id="qBody" class="tab-body"></div></div>
 </div>
 
-<p>You might be wondering: doesn't computing $a^x \bmod N$ for enormous $x$ take forever? If $x$ were 300 quadrillion, would we need to multiply $a$ by itself 300 quadrillion times? Fortunately not. A technique called <em>repeated squaring</em> lets us compute $a^x \bmod N$ using only about $\log_2(x)$ multiplications. The idea is to break $x$ into powers of 2 (its binary representation) and compute $a^1, a^2, a^4, a^8, \ldots$ by squaring each time. This is efficient on both classical and quantum computers.</p>
+<h3>The actual quantum circuit</h3>
+<p>Here's what the quantum circuit for Shor's algorithm looks like. The top wires are the <strong>counting register</strong> (the qubits that will store our measurement). The bottom wire is the <strong>work register</strong>, initialized to $|1\rangle$. Each box represents a quantum gate. Time flows left to right.</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Quantum circuit for Shor's algorithm</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg viewBox="0 0 760 360" style="width:100%;min-width:580px;height:auto;font-family:system-ui,sans-serif">
+      <!-- Register labels -->
+      <text x="14" y="50" font-size="11" font-weight="700" fill="#5e5485">Counting</text>
+      <text x="14" y="62" font-size="11" font-weight="700" fill="#5e5485">register</text>
+      <text x="14" y="76" font-size="9" fill="#9590ac" font-style="italic">(m qubits)</text>
+      
+      <text x="14" y="240" font-size="11" font-weight="700" fill="#5e5485">Work</text>
+      <text x="14" y="252" font-size="11" font-weight="700" fill="#5e5485">register</text>
+      <text x="14" y="266" font-size="9" fill="#9590ac" font-style="italic">(n qubits)</text>
+      
+      <!-- Initial state labels -->
+      <text x="78" y="55" font-size="13" fill="#1a0e4b" font-weight="600">|0⟩</text>
+      <text x="78" y="95" font-size="13" fill="#1a0e4b" font-weight="600">|0⟩</text>
+      <text x="78" y="135" font-size="13" fill="#9590ac">⋮</text>
+      <text x="78" y="170" font-size="13" fill="#1a0e4b" font-weight="600">|0⟩</text>
+      <text x="78" y="245" font-size="13" fill="#1a0e4b" font-weight="600">|1⟩</text>
+      
+      <!-- Wires -->
+      <line x1="100" y1="50" x2="700" y2="50" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="100" y1="90" x2="700" y2="90" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="100" y1="165" x2="700" y2="165" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="100" y1="240" x2="700" y2="240" stroke="#1a0e4b" stroke-width="3"/>
+      
+      <!-- Hadamard gates on counting register -->
+      <rect x="120" y="35" width="34" height="30" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="137" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#7c3aed">H</text>
+      
+      <rect x="120" y="75" width="34" height="30" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="137" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#7c3aed">H</text>
+      
+      <rect x="120" y="150" width="34" height="30" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="137" y="170" text-anchor="middle" font-size="14" font-weight="700" fill="#7c3aed">H</text>
+      
+      <text x="137" y="305" text-anchor="middle" font-size="10" fill="#5e5485" font-weight="600">Step 1:</text>
+      <text x="137" y="320" text-anchor="middle" font-size="10" fill="#5e5485">Superposition</text>
+      
+      <!-- Controlled U gates -->
+      <circle cx="210" cy="50" r="5" fill="#7c3aed"/>
+      <line x1="210" y1="50" x2="210" y2="240" stroke="#7c3aed" stroke-width="1.5"/>
+      
+      <circle cx="280" cy="90" r="5" fill="#7c3aed"/>
+      <line x1="280" y1="90" x2="280" y2="240" stroke="#7c3aed" stroke-width="1.5"/>
+      
+      <circle cx="380" cy="165" r="5" fill="#7c3aed"/>
+      <line x1="380" y1="165" x2="380" y2="240" stroke="#7c3aed" stroke-width="1.5"/>
+      
+      <!-- U gates on work register: labels inside the box for consistency -->
+      <rect x="190" y="220" width="40" height="40" rx="4" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="210" y="237" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">U</text>
+      <text x="210" y="252" text-anchor="middle" font-size="9" fill="#7c3aed">a</text>
+      
+      <rect x="260" y="220" width="40" height="40" rx="4" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="280" y="237" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">U</text>
+      <text x="280" y="252" text-anchor="middle" font-size="9" fill="#7c3aed">a²</text>
+      
+      <text x="335" y="245" text-anchor="middle" font-size="14" fill="#9590ac">⋯</text>
+      
+      <rect x="360" y="220" width="40" height="40" rx="4" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="380" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">U</text>
+      <text x="380" y="253" text-anchor="middle" font-size="8" fill="#7c3aed">a^2ᵐ⁻¹</text>
+      
+      <text x="295" y="305" text-anchor="middle" font-size="10" fill="#5e5485" font-weight="600">Step 2:</text>
+      <text x="295" y="320" text-anchor="middle" font-size="10" fill="#5e5485">Modular exponentiation</text>
+      
+      <!-- Inverse QFT box -->
+      <rect x="450" y="30" width="120" height="155" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+      <text x="510" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#7c3aed">QFT</text>
+      <text x="510" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#7c3aed">⁻¹</text>
+      
+      <text x="510" y="305" text-anchor="middle" font-size="10" fill="#5e5485" font-weight="600">Step 3:</text>
+      <text x="510" y="320" text-anchor="middle" font-size="10" fill="#5e5485">Inverse QFT</text>
+      
+      <!-- Measurement boxes -->
+      <rect x="610" y="35" width="34" height="30" rx="4" fill="white" stroke="#1a0e4b" stroke-width="1.5"/>
+      <path d="M 616 58 A 11 11 0 0 1 638 58" fill="none" stroke="#1a0e4b" stroke-width="1.3"/>
+      <line x1="627" y1="58" x2="640" y2="42" stroke="#1a0e4b" stroke-width="1.3"/>
+      
+      <rect x="610" y="75" width="34" height="30" rx="4" fill="white" stroke="#1a0e4b" stroke-width="1.5"/>
+      <path d="M 616 98 A 11 11 0 0 1 638 98" fill="none" stroke="#1a0e4b" stroke-width="1.3"/>
+      <line x1="627" y1="98" x2="640" y2="82" stroke="#1a0e4b" stroke-width="1.3"/>
+      
+      <rect x="610" y="150" width="34" height="30" rx="4" fill="white" stroke="#1a0e4b" stroke-width="1.5"/>
+      <path d="M 616 173 A 11 11 0 0 1 638 173" fill="none" stroke="#1a0e4b" stroke-width="1.3"/>
+      <line x1="627" y1="173" x2="640" y2="157" stroke="#1a0e4b" stroke-width="1.3"/>
+      
+      <text x="627" y="305" text-anchor="middle" font-size="10" fill="#5e5485" font-weight="600">Step 4:</text>
+      <text x="627" y="320" text-anchor="middle" font-size="10" fill="#5e5485">Measure</text>
+      
+      <!-- Classical bit lines from measurements to y -->
+      <line x1="644" y1="50" x2="680" y2="50" stroke="#1a0e4b" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="644" y1="90" x2="680" y2="90" stroke="#1a0e4b" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="644" y1="165" x2="680" y2="165" stroke="#1a0e4b" stroke-width="1" stroke-dasharray="3,2"/>
+      
+      <text x="690" y="113" font-size="13" fill="#7c3aed" font-weight="700">→ y</text>
+    </svg>
+  </div>
+  <div class="w-foot">A real quantum circuit for Shor's algorithm. The output $y$ approximates $k \cdot Q/r$ for a random $k$.</div>
+</div>
+
+<p>Reading the circuit left to right: each Hadamard gate (H) on the counting register puts a single qubit into a 50/50 superposition. Together they put the whole register into a uniform superposition over all $2^m$ values. Then the controlled-$U$ gates apply $a, a^2, a^4, \ldots, a^{2^{m-1}}$ to the work register, each controlled by a counting qubit. This is how the modular exponentiation gets done in superposition, using the repeated-squaring trick. Finally, the inverse QFT converts the periodicity into a measurable peak, and the measurement reads out an integer $y$ that we then post-process classically to find $r$.</p>
+
+<p>This is the actual circuit IBM and Google run on their quantum hardware. For $N = 15$, it requires 12 qubits total (8 counting + 4 work). For larger numbers, both registers grow. A 2048-bit RSA key would need a few thousand logical qubits, but error correction inflates this to millions of physical qubits.</p>
+
+<p>You might be wondering: doesn't computing $a^x \bmod N$ for enormous $x$ take forever? If $x$ were 300 quadrillion, would we need to multiply $a$ by itself 300 quadrillion times? Fortunately not. A technique called <em>repeated squaring</em> lets us compute $a^x \bmod N$ using only about $\log_2(x)$ multiplications. The idea is to break $x$ into powers of 2 (its binary representation) and compute $a^1, a^2, a^4, a^8, \ldots$ by squaring each time. This is exactly what those controlled-$U$ gates above are doing, one squared power at a time.</p>
 
 <div class="review rv" id="r7">
   <div class="review-head"><span>Check your understanding</span></div>
@@ -358,11 +521,721 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 
 <p>Once we know $r = 4$, the classical post-processing computes $a^{r/2} = 2^2 = 4$ and extracts $\gcd(4-1, 15) = 3$ and $\gcd(4+1, 15) = 5$. This works for all valid choices of $a$.</p>
 
-<h3>What about real quantum hardware?</h3>
+<h2 id="s-circuit">Building the actual circuit for $N = 15$</h2>
 
-<p>IBM has demonstrated Shor's algorithm on real quantum processors. For $N = 15$ with $a = 2$, the circuit requires 12 qubits (8 measurement + 4 target) and, after transpilation, has a two-qubit gate depth of about 187. Running on actual hardware introduces noise, but with error mitigation techniques, the correct factors can still be recovered. More recent demonstrations have factored $N = 21$ using compiled circuits on just 5 qubits.</p>
+<p>Now we're going to leave the abstractions behind and build the actual quantum circuit that factors $N = 15$. This is the same circuit that IBM and Google have run on their real quantum hardware. We'll work through it gate by gate, and at each stage we'll see exactly what happens to the quantum state.</p>
 
-<p>The limiting factor for scaling Shor's algorithm to cryptographically relevant numbers (2048+ bits) isn't the algorithm itself but the hardware. Current estimates suggest that factoring a 2048-bit RSA key would require roughly 20 million noisy qubits and about 8 hours of computation.</p>
+<p>For this walkthrough, we choose $a = 2$ (the smallest valid base for $N = 15$). The valid bases for $N = 15$ are $\{2, 4, 7, 8, 11, 13, 14\}$, and we know from our earlier exploration that $a = 2$ has period $r = 4$.</p>
+
+<h3>Choosing the register sizes</h3>
+
+<p>Two registers are needed:</p>
+
+<p><strong>The work register</strong> needs enough qubits to hold any value from $0$ to $N - 1 = 14$. That requires $n = \lceil \log_2 N \rceil = 4$ qubits, giving us states $|0\rangle$ through $|15\rangle$ (we just won't use $|15\rangle$).</p>
+
+<p><strong>The counting register</strong> needs enough qubits to give us a precise enough phase estimate. The standard choice is $m = 2n = 8$ qubits, giving us $Q = 2^m = 256$ possible measurement outcomes.<sup class="cite"><a href="#ref-ibm">3</a></sup> With this precision, the continued fractions algorithm can reliably extract $r$ as long as $r < N$.</p>
+
+<p>Total: 12 qubits (8 counting + 4 work).</p>
+
+<h3>The modular multiplication operator $M_2$</h3>
+
+<p>The heart of the circuit is the gate that multiplies by $a = 2$ modulo $15$. We need $M_2 |x\rangle = |2x \bmod 15\rangle$ for every $x \in \{0, 1, \ldots, 14\}$.</p>
+
+<p>Let's see what $M_2$ does to every basis state:</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Action of $M_2$ on basis states (mod 15)</span></div>
+  <div class="w-body">
+    <table class="mt" style="font-size:.78rem">
+      <thead><tr><th>Input</th><th>Output</th><th>Input</th><th>Output</th><th>Input</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td>$M_2|0\rangle$</td><td>$|0\rangle$</td><td>$M_2|5\rangle$</td><td>$|10\rangle$</td><td>$M_2|10\rangle$</td><td>$|5\rangle$</td></tr>
+        <tr><td>$M_2|1\rangle$</td><td>$|2\rangle$</td><td>$M_2|6\rangle$</td><td>$|12\rangle$</td><td>$M_2|11\rangle$</td><td>$|7\rangle$</td></tr>
+        <tr><td>$M_2|2\rangle$</td><td>$|4\rangle$</td><td>$M_2|7\rangle$</td><td>$|14\rangle$</td><td>$M_2|12\rangle$</td><td>$|9\rangle$</td></tr>
+        <tr><td>$M_2|3\rangle$</td><td>$|6\rangle$</td><td>$M_2|8\rangle$</td><td>$|1\rangle$</td><td>$M_2|13\rangle$</td><td>$|11\rangle$</td></tr>
+        <tr><td>$M_2|4\rangle$</td><td>$|8\rangle$</td><td>$M_2|9\rangle$</td><td>$|3\rangle$</td><td>$M_2|14\rangle$</td><td>$|13\rangle$</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p>Notice this is just a permutation of the basis states. In fact, for $N = 15$ the action of $M_2$ can be implemented with just three SWAP gates between specific qubit pairs.<sup class="cite"><a href="#ref-ibm">3</a></sup> Looking at the binary representations, multiplying by 2 mod 15 corresponds to a cyclic rotation of the four bits:</p>
+
+<div class="math-block">$$|q_3 q_2 q_1 q_0\rangle \mapsto |q_2 q_1 q_0 q_3\rangle$$</div>
+
+<p>This is exactly what three swap gates in sequence accomplish. Here is the circuit:</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">$M_2$ implementation: three SWAP gates</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg class="ic-svg" data-icid="m2swap" viewBox="0 0 460 220" style="width:100%;max-width:480px;height:auto;font-family:system-ui,sans-serif">
+      <text x="20" y="55" font-size="11" font-weight="600" fill="#5e5485">$q_0$</text>
+      <text x="20" y="95" font-size="11" font-weight="600" fill="#5e5485">$q_1$</text>
+      <text x="20" y="135" font-size="11" font-weight="600" fill="#5e5485">$q_2$</text>
+      <text x="20" y="175" font-size="11" font-weight="600" fill="#5e5485">$q_3$</text>
+      
+      <line x1="50" y1="50" x2="430" y2="50" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="50" y1="90" x2="430" y2="90" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="50" y1="130" x2="430" y2="130" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="50" y1="170" x2="430" y2="170" stroke="#1a0e4b" stroke-width="1.5"/>
+      
+      <g class="ic-grp" data-info="swap1">
+        <rect x="105" y="120" width="30" height="60" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="120" y1="130" x2="120" y2="170" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="113" y1="123" x2="127" y2="137" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="127" y1="123" x2="113" y2="137" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="113" y1="163" x2="127" y2="177" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="127" y1="163" x2="113" y2="177" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="120" y="200" text-anchor="middle" font-size="9" fill="#5e5485">SWAP</text>
+        <text x="120" y="212" text-anchor="middle" font-size="9" fill="#5e5485">$q_2 \leftrightarrow q_3$</text>
+      </g>
+      
+      <g class="ic-grp" data-info="swap2">
+        <rect x="225" y="80" width="30" height="60" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="240" y1="90" x2="240" y2="130" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="233" y1="83" x2="247" y2="97" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="247" y1="83" x2="233" y2="97" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="233" y1="123" x2="247" y2="137" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="247" y1="123" x2="233" y2="137" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="240" y="200" text-anchor="middle" font-size="9" fill="#5e5485">SWAP</text>
+        <text x="240" y="212" text-anchor="middle" font-size="9" fill="#5e5485">$q_1 \leftrightarrow q_2$</text>
+      </g>
+      
+      <g class="ic-grp" data-info="swap3">
+        <rect x="345" y="40" width="30" height="60" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="360" y1="50" x2="360" y2="90" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="353" y1="43" x2="367" y2="57" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="367" y1="43" x2="353" y2="57" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="353" y1="83" x2="367" y2="97" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="367" y1="83" x2="353" y2="97" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="360" y="200" text-anchor="middle" font-size="9" fill="#5e5485">SWAP</text>
+        <text x="360" y="212" text-anchor="middle" font-size="9" fill="#5e5485">$q_0 \leftrightarrow q_1$</text>
+      </g>
+    </svg>
+  </div>
+  <div class="ic-info" data-icinfo-for="m2swap">
+    <div class="ic-info-title">Click any SWAP to explore</div>
+    <div class="ic-info-body ic-prompt">Three SWAPs in sequence accomplish the bit rotation $|q_3 q_2 q_1 q_0\rangle \to |q_2 q_1 q_0 q_3\rangle$.</div>
+  </div>
+</div>
+
+<h3>The modular exponentiation operators $M_{2^{2^k}}$</h3>
+
+<p>The phase estimation circuit doesn't just need $M_2$. It needs $M_2$, $M_2^2 = M_4$, $M_2^4 = M_{16 \bmod 15} = M_1$, $M_2^8 = M_1$, and so on, controlled by each of the 8 counting qubits. Let's compute these powers:</p>
+
+<div class="math-block">$$2^{2^0} \bmod 15 = 2,\quad 2^{2^1} \bmod 15 = 4,\quad 2^{2^2} \bmod 15 = 16 \bmod 15 = 1$$</div>
+
+<p>From $k = 2$ onward, the operator is just $M_1$, which is the identity (it does nothing). So we only need to actually implement two non-trivial operators: $M_2$ and $M_4$. The remaining six counting qubits don't need any controlled operation at all.</p>
+
+<p>For $M_4$, the action is $M_4|x\rangle = |4x \bmod 15\rangle$, which corresponds to a different bit permutation:</p>
+
+<div class="math-block">$$|q_3 q_2 q_1 q_0\rangle \mapsto |q_1 q_0 q_3 q_2\rangle$$</div>
+
+<p>This requires only two SWAP gates: swap $q_0 \leftrightarrow q_2$ and swap $q_1 \leftrightarrow q_3$.</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">$M_4$ implementation: two SWAP gates</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg class="ic-svg" data-icid="m4swap" viewBox="0 0 460 220" style="width:100%;max-width:480px;height:auto;font-family:system-ui,sans-serif">
+      <text x="20" y="55" font-size="11" font-weight="600" fill="#5e5485">$q_0$</text>
+      <text x="20" y="95" font-size="11" font-weight="600" fill="#5e5485">$q_1$</text>
+      <text x="20" y="135" font-size="11" font-weight="600" fill="#5e5485">$q_2$</text>
+      <text x="20" y="175" font-size="11" font-weight="600" fill="#5e5485">$q_3$</text>
+      
+      <line x1="50" y1="50" x2="430" y2="50" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="50" y1="90" x2="430" y2="90" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="50" y1="130" x2="430" y2="130" stroke="#1a0e4b" stroke-width="1.5"/>
+      <line x1="50" y1="170" x2="430" y2="170" stroke="#1a0e4b" stroke-width="1.5"/>
+      
+      <g class="ic-grp" data-info="swap02">
+        <rect x="145" y="40" width="30" height="100" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="160" y1="50" x2="160" y2="130" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="153" y1="43" x2="167" y2="57" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="167" y1="43" x2="153" y2="57" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="153" y1="123" x2="167" y2="137" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="167" y1="123" x2="153" y2="137" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="160" y="200" text-anchor="middle" font-size="9" fill="#5e5485">SWAP</text>
+        <text x="160" y="212" text-anchor="middle" font-size="9" fill="#5e5485">$q_0 \leftrightarrow q_2$</text>
+      </g>
+      
+      <g class="ic-grp" data-info="swap13">
+        <rect x="305" y="80" width="30" height="100" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="320" y1="90" x2="320" y2="170" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="313" y1="83" x2="327" y2="97" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="327" y1="83" x2="313" y2="97" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="313" y1="163" x2="327" y2="177" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="327" y1="163" x2="313" y2="177" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="320" y="200" text-anchor="middle" font-size="9" fill="#5e5485">SWAP</text>
+        <text x="320" y="212" text-anchor="middle" font-size="9" fill="#5e5485">$q_1 \leftrightarrow q_3$</text>
+      </g>
+    </svg>
+  </div>
+  <div class="ic-info" data-icinfo-for="m4swap">
+    <div class="ic-info-title">Click any SWAP to explore</div>
+    <div class="ic-info-body ic-prompt">Two SWAPs in parallel accomplish the bit permutation $|q_3 q_2 q_1 q_0\rangle \to |q_1 q_0 q_3 q_2\rangle$.</div>
+  </div>
+</div>
+
+<h3>Inside the inverse QFT</h3>
+
+<p>We've been treating the inverse QFT as a single box. But it's not really a single gate — it's a sequence of about $\frac{m(m+1)}{2}$ smaller gates. For our 8-qubit counting register, that's roughly 36 gates. Here is what's inside the box, shown for a simpler 4-qubit version (the structure scales the same way to 8 qubits):</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Inverse QFT decomposition (4-qubit example)</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg class="ic-svg" data-icid="iqftdecomp" viewBox="0 0 720 240" style="width:100%;min-width:560px;height:auto;font-family:system-ui,sans-serif">
+      <text x="14" y="55" font-size="11" font-weight="600" fill="#5e5485">$c_0$</text>
+      <text x="14" y="105" font-size="11" font-weight="600" fill="#5e5485">$c_1$</text>
+      <text x="14" y="155" font-size="11" font-weight="600" fill="#5e5485">$c_2$</text>
+      <text x="14" y="205" font-size="11" font-weight="600" fill="#5e5485">$c_3$</text>
+      
+      <line x1="40" y1="50" x2="690" y2="50" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="40" y1="100" x2="690" y2="100" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="40" y1="150" x2="690" y2="150" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="40" y1="200" x2="690" y2="200" stroke="#1a0e4b" stroke-width="1"/>
+      
+      <!-- Bit-reversal SWAPs (group) -->
+      <g class="ic-grp" data-info="bitrev">
+        <rect x="55" y="40" width="55" height="170" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="70" y1="50" x2="70" y2="200" stroke="#9590ac" stroke-width="1.2"/>
+        <line x1="63" y1="43" x2="77" y2="57" stroke="#9590ac" stroke-width="2"/>
+        <line x1="77" y1="43" x2="63" y2="57" stroke="#9590ac" stroke-width="2"/>
+        <line x1="63" y1="193" x2="77" y2="207" stroke="#9590ac" stroke-width="2"/>
+        <line x1="77" y1="193" x2="63" y2="207" stroke="#9590ac" stroke-width="2"/>
+        <line x1="95" y1="100" x2="95" y2="150" stroke="#9590ac" stroke-width="1.2"/>
+        <line x1="88" y1="93" x2="102" y2="107" stroke="#9590ac" stroke-width="2"/>
+        <line x1="102" y1="93" x2="88" y2="107" stroke="#9590ac" stroke-width="2"/>
+        <line x1="88" y1="143" x2="102" y2="157" stroke="#9590ac" stroke-width="2"/>
+        <line x1="102" y1="143" x2="88" y2="157" stroke="#9590ac" stroke-width="2"/>
+      </g>
+      
+      <!-- All Hadamards grouped -->
+      <g class="ic-grp" data-info="iqfth">
+        <rect x="135" y="188" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="146" y="205" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="220" y="138" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="231" y="155" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="335" y="88" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="346" y="105" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="490" y="38" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="501" y="55" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+      </g>
+      
+      <!-- All controlled phase rotations grouped -->
+      <g class="ic-grp" data-info="cphase">
+        <circle cx="190" cy="200" r="3.5" fill="#7c3aed"/>
+        <line x1="190" y1="200" x2="190" y2="150" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="180" y="138" width="20" height="24" rx="3" fill="white" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="190" y="155" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">R₂†</text>
+        
+        <circle cx="275" cy="200" r="3.5" fill="#7c3aed"/>
+        <line x1="275" y1="200" x2="275" y2="100" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="265" y="88" width="20" height="24" rx="3" fill="white" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="275" y="105" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">R₃†</text>
+        
+        <circle cx="305" cy="150" r="3.5" fill="#7c3aed"/>
+        <line x1="305" y1="150" x2="305" y2="100" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="295" y="88" width="20" height="24" rx="3" fill="white" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="305" y="105" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">R₂†</text>
+        
+        <circle cx="390" cy="200" r="3.5" fill="#7c3aed"/>
+        <line x1="390" y1="200" x2="390" y2="50" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="380" y="38" width="20" height="24" rx="3" fill="white" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="390" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">R₄†</text>
+        
+        <circle cx="425" cy="150" r="3.5" fill="#7c3aed"/>
+        <line x1="425" y1="150" x2="425" y2="50" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="415" y="38" width="20" height="24" rx="3" fill="white" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="425" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">R₃†</text>
+        
+        <circle cx="460" cy="100" r="3.5" fill="#7c3aed"/>
+        <line x1="460" y1="100" x2="460" y2="50" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="450" y="38" width="20" height="24" rx="3" fill="white" stroke="#7c3aed" stroke-width="1.2"/>
+        <text x="460" y="55" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">R₂†</text>
+      </g>
+    </svg>
+  </div>
+  <div class="ic-info" data-icinfo-for="iqftdecomp">
+    <div class="ic-info-title">Click an element type to explore</div>
+    <div class="ic-info-body ic-prompt">Three categories of gate make up the inverse QFT: bit-reversal SWAPs at the start, Hadamards on each qubit, and controlled phase rotations $R_k^\dagger$ between them.</div>
+  </div>
+</div>
+
+<p>Each of the small purple gates marked $R_k^\dagger$ is a controlled phase rotation. It applies a phase of $e^{-2\pi i / 2^k}$ to the target qubit, but only when the control is $|1\rangle$. The cascading pattern of these phase rotations is what implements the Fourier transform: it spreads the right phase information across the qubits so that interference reveals frequencies.</p>
+
+<p>You don't need to memorize the QFT structure. The takeaway is: the QFT box in our main circuit is built from elementary single-qubit and two-qubit gates, the same kinds of gates that real hardware can natively execute. Nothing magical is happening inside, just careful interference engineering.</p>
+
+<h3>How the controlled multiplication actually works</h3>
+
+<p>One more piece is worth showing in detail: how a "controlled-$M_2$" actually decomposes into hardware gates. The high-level picture is one control qubit and a multi-qubit operation. But hardware can only run one- and two-qubit gates, so we need to expand it.</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Controlled-$M_2$ decomposition</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg class="ic-svg" data-icid="cm2decomp" viewBox="0 0 540 280" style="width:100%;min-width:480px;height:auto;font-family:system-ui,sans-serif">
+      <text x="14" y="55" font-size="11" font-weight="600" fill="#5e5485">$c_0$</text>
+      <text x="14" y="105" font-size="11" font-weight="600" fill="#5e5485">$q_0$</text>
+      <text x="14" y="145" font-size="11" font-weight="600" fill="#5e5485">$q_1$</text>
+      <text x="14" y="185" font-size="11" font-weight="600" fill="#5e5485">$q_2$</text>
+      <text x="14" y="225" font-size="11" font-weight="600" fill="#5e5485">$q_3$</text>
+      
+      <line x1="40" y1="50" x2="510" y2="50" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="40" y1="100" x2="510" y2="100" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="40" y1="140" x2="510" y2="140" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="40" y1="180" x2="510" y2="180" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="40" y1="220" x2="510" y2="220" stroke="#1a0e4b" stroke-width="1"/>
+      
+      <g class="ic-grp" data-info="fred1">
+        <rect x="105" y="40" width="30" height="200" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="120" cy="50" r="4" fill="#7c3aed"/>
+        <line x1="120" y1="50" x2="120" y2="220" stroke="#7c3aed" stroke-width="1.2"/>
+        <line x1="113" y1="173" x2="127" y2="187" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="127" y1="173" x2="113" y2="187" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="113" y1="213" x2="127" y2="227" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="127" y1="213" x2="113" y2="227" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="120" y="258" text-anchor="middle" font-size="9" fill="#5e5485">CSWAP</text>
+        <text x="120" y="270" text-anchor="middle" font-size="9" fill="#5e5485">$q_2,q_3$</text>
+      </g>
+      
+      <g class="ic-grp" data-info="fred2">
+        <rect x="245" y="40" width="30" height="160" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="260" cy="50" r="4" fill="#7c3aed"/>
+        <line x1="260" y1="50" x2="260" y2="180" stroke="#7c3aed" stroke-width="1.2"/>
+        <line x1="253" y1="133" x2="267" y2="147" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="267" y1="133" x2="253" y2="147" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="253" y1="173" x2="267" y2="187" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="267" y1="173" x2="253" y2="187" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="260" y="258" text-anchor="middle" font-size="9" fill="#5e5485">CSWAP</text>
+        <text x="260" y="270" text-anchor="middle" font-size="9" fill="#5e5485">$q_1,q_2$</text>
+      </g>
+      
+      <g class="ic-grp" data-info="fred3">
+        <rect x="385" y="40" width="30" height="120" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="400" cy="50" r="4" fill="#7c3aed"/>
+        <line x1="400" y1="50" x2="400" y2="140" stroke="#7c3aed" stroke-width="1.2"/>
+        <line x1="393" y1="93" x2="407" y2="107" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="407" y1="93" x2="393" y2="107" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="393" y1="133" x2="407" y2="147" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="407" y1="133" x2="393" y2="147" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="400" y="258" text-anchor="middle" font-size="9" fill="#5e5485">CSWAP</text>
+        <text x="400" y="270" text-anchor="middle" font-size="9" fill="#5e5485">$q_0,q_1$</text>
+      </g>
+    </svg>
+  </div>
+  <div class="ic-info" data-icinfo-for="cm2decomp">
+    <div class="ic-info-title">Click any Fredkin gate to explore</div>
+    <div class="ic-info-body ic-prompt">When $c_0$ is $|1\rangle$, all three CSWAPs fire and perform $M_2$ on the work register. When $c_0$ is $|0\rangle$, none fire.</div>
+  </div>
+</div>
+
+<p>Each controlled-SWAP (often called a Fredkin gate) further decomposes into smaller pieces. Let's go one level deeper to see what actually runs on the hardware.</p>
+
+<h3>Going down to hardware gates</h3>
+
+<p>Real quantum hardware can only execute a small set of native gates. On IBM's superconducting processors, that set is roughly: arbitrary single-qubit rotations, plus a single two-qubit entangling gate (CNOT or CZ). Everything else has to be compiled into sequences of these.</p>
+
+<p>The basic two-qubit gate we've been drawing as SWAP isn't actually a primitive. A SWAP between two qubits compiles into <strong>three CNOT gates</strong>:</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">SWAP = three CNOTs</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg class="ic-svg" data-icid="swap3cnot" viewBox="0 0 540 180" style="width:100%;max-width:560px;height:auto;font-family:system-ui,sans-serif">
+      <text x="14" y="65" font-size="11" font-weight="600" fill="#5e5485">$q_a$</text>
+      <text x="14" y="125" font-size="11" font-weight="600" fill="#5e5485">$q_b$</text>
+      
+      <g class="ic-grp" data-info="swapsymbol">
+        <rect x="85" y="50" width="30" height="80" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="40" y1="60" x2="160" y2="60" stroke="#1a0e4b" stroke-width="1.2"/>
+        <line x1="40" y1="120" x2="160" y2="120" stroke="#1a0e4b" stroke-width="1.2"/>
+        <line x1="100" y1="60" x2="100" y2="120" stroke="#7c3aed" stroke-width="2"/>
+        <line x1="93" y1="53" x2="107" y2="67" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="107" y1="53" x2="93" y2="67" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="93" y1="113" x2="107" y2="127" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="107" y1="113" x2="93" y2="127" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="100" y="155" text-anchor="middle" font-size="10" fill="#5e5485">SWAP</text>
+      </g>
+      
+      <text x="195" y="95" text-anchor="middle" font-size="22" font-weight="700" fill="#5e5485">=</text>
+      
+      <line x1="230" y1="60" x2="510" y2="60" stroke="#1a0e4b" stroke-width="1.2"/>
+      <line x1="230" y1="120" x2="510" y2="120" stroke="#1a0e4b" stroke-width="1.2"/>
+      
+      <g class="ic-grp" data-info="cnot1">
+        <rect x="275" y="50" width="30" height="80" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="290" cy="60" r="4.5" fill="#7c3aed"/>
+        <line x1="290" y1="60" x2="290" y2="120" stroke="#7c3aed" stroke-width="1.5"/>
+        <circle cx="290" cy="120" r="9" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="281" y1="120" x2="299" y2="120" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="290" y1="111" x2="290" y2="129" stroke="#7c3aed" stroke-width="1.5"/>
+      </g>
+      
+      <g class="ic-grp" data-info="cnot2">
+        <rect x="355" y="50" width="30" height="80" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="370" cy="120" r="4.5" fill="#7c3aed"/>
+        <line x1="370" y1="60" x2="370" y2="120" stroke="#7c3aed" stroke-width="1.5"/>
+        <circle cx="370" cy="60" r="9" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="361" y1="60" x2="379" y2="60" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="370" y1="51" x2="370" y2="69" stroke="#7c3aed" stroke-width="1.5"/>
+      </g>
+      
+      <g class="ic-grp" data-info="cnot3">
+        <rect x="435" y="50" width="30" height="80" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="450" cy="60" r="4.5" fill="#7c3aed"/>
+        <line x1="450" y1="60" x2="450" y2="120" stroke="#7c3aed" stroke-width="1.5"/>
+        <circle cx="450" cy="120" r="9" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="441" y1="120" x2="459" y2="120" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="450" y1="111" x2="450" y2="129" stroke="#7c3aed" stroke-width="1.5"/>
+      </g>
+      
+      <text x="370" y="155" text-anchor="middle" font-size="10" fill="#5e5485">CNOT, CNOT (reversed), CNOT</text>
+    </svg>
+  </div>
+  <div class="ic-info" data-icinfo-for="swap3cnot">
+    <div class="ic-info-title">Click any gate to explore</div>
+    <div class="ic-info-body ic-prompt">A SWAP is not a primitive on real hardware. Compile it into three alternating-direction CNOTs.</div>
+  </div>
+</div>
+
+<p>So the three SWAPs in our $M_2$ implementation are really 9 CNOTs. The two SWAPs in $M_4$ are 6 CNOTs.</p>
+
+<p>The Fredkin gate (controlled-SWAP) is even more expensive. It compiles into approximately <strong>one Toffoli gate</strong> (a controlled-controlled-NOT) sandwiched between two CNOTs:</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Fredkin (CSWAP) = 2 CNOTs + 1 Toffoli</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg class="ic-svg" data-icid="fredkindecomp" viewBox="0 0 580 200" style="width:100%;max-width:600px;height:auto;font-family:system-ui,sans-serif">
+      <text x="14" y="55" font-size="11" font-weight="600" fill="#5e5485">$c$</text>
+      <text x="14" y="105" font-size="11" font-weight="600" fill="#5e5485">$q_a$</text>
+      <text x="14" y="155" font-size="11" font-weight="600" fill="#5e5485">$q_b$</text>
+      
+      <g class="ic-grp" data-info="cswapsymbol">
+        <rect x="90" y="40" width="30" height="120" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <line x1="40" y1="50" x2="170" y2="50" stroke="#1a0e4b" stroke-width="1.2"/>
+        <line x1="40" y1="100" x2="170" y2="100" stroke="#1a0e4b" stroke-width="1.2"/>
+        <line x1="40" y1="150" x2="170" y2="150" stroke="#1a0e4b" stroke-width="1.2"/>
+        <circle cx="105" cy="50" r="4.5" fill="#7c3aed"/>
+        <line x1="105" y1="50" x2="105" y2="150" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="98" y1="93" x2="112" y2="107" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="112" y1="93" x2="98" y2="107" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="98" y1="143" x2="112" y2="157" stroke="#7c3aed" stroke-width="2.5"/>
+        <line x1="112" y1="143" x2="98" y2="157" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="105" y="183" text-anchor="middle" font-size="10" fill="#5e5485">CSWAP</text>
+      </g>
+      
+      <text x="200" y="105" text-anchor="middle" font-size="22" font-weight="700" fill="#5e5485">=</text>
+      
+      <line x1="240" y1="50" x2="550" y2="50" stroke="#1a0e4b" stroke-width="1.2"/>
+      <line x1="240" y1="100" x2="550" y2="100" stroke="#1a0e4b" stroke-width="1.2"/>
+      <line x1="240" y1="150" x2="550" y2="150" stroke="#1a0e4b" stroke-width="1.2"/>
+      
+      <g class="ic-grp" data-info="cnotpre">
+        <rect x="275" y="90" width="30" height="70" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="290" cy="150" r="4.5" fill="#7c3aed"/>
+        <line x1="290" y1="100" x2="290" y2="150" stroke="#7c3aed" stroke-width="1.5"/>
+        <circle cx="290" cy="100" r="9" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="281" y1="100" x2="299" y2="100" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="290" y1="91" x2="290" y2="109" stroke="#7c3aed" stroke-width="1.5"/>
+      </g>
+      
+      <g class="ic-grp" data-info="toffoli">
+        <rect x="380" y="40" width="30" height="120" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="395" cy="50" r="4.5" fill="#7c3aed"/>
+        <circle cx="395" cy="100" r="4.5" fill="#7c3aed"/>
+        <line x1="395" y1="50" x2="395" y2="150" stroke="#7c3aed" stroke-width="1.5"/>
+        <circle cx="395" cy="150" r="9" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="386" y1="150" x2="404" y2="150" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="395" y1="141" x2="395" y2="159" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="395" y="183" text-anchor="middle" font-size="9" fill="#5e5485">Toffoli (CCNOT)</text>
+      </g>
+      
+      <g class="ic-grp" data-info="cnotpost">
+        <rect x="480" y="90" width="30" height="70" rx="3" fill="white" fill-opacity="0" stroke="transparent"/>
+        <circle cx="495" cy="150" r="4.5" fill="#7c3aed"/>
+        <line x1="495" y1="100" x2="495" y2="150" stroke="#7c3aed" stroke-width="1.5"/>
+        <circle cx="495" cy="100" r="9" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="486" y1="100" x2="504" y2="100" stroke="#7c3aed" stroke-width="1.5"/>
+        <line x1="495" y1="91" x2="495" y2="109" stroke="#7c3aed" stroke-width="1.5"/>
+      </g>
+    </svg>
+  </div>
+  <div class="ic-info" data-icinfo-for="fredkindecomp">
+    <div class="ic-info-title">Click any gate to explore</div>
+    <div class="ic-info-body ic-prompt">Even the Fredkin decomposition isn't fully primitive. The Toffoli inside still needs to compile into about 6 CNOTs plus single-qubit gates.</div>
+  </div>
+</div>
+
+<p>The Toffoli gate is itself non-native on most superconducting hardware. It compiles further into roughly <strong>6 CNOTs</strong> plus a handful of single-qubit gates. So one Fredkin becomes about 8 CNOTs total. Three Fredkins (one controlled-$M_2$) becomes about 24 CNOTs.</p>
+
+<p>This is why circuit depth matters so much. A diagram that looks like a few clean boxes at the algorithmic level expands into hundreds of two-qubit gates at the hardware level. IBM reports a transpiled two-qubit gate depth of about 187 for the full $N=15$ circuit, and that's after extensive optimization.<sup class="cite"><a href="#ref-ibm">3</a></sup></p>
+
+<h3>The pyramid of abstraction</h3>
+
+<p>Pulling back, here's the layered picture of what's actually happening:</p>
+
+<div class="widget rv">
+  <div class="w-body" style="padding:24px">
+    <table class="mt" style="font-size:.85rem">
+      <thead><tr><th>Layer</th><th>What you see</th><th>Built from</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Algorithm</strong></td><td>Phase estimation + period extraction</td><td>$H$, controlled-$M_a^{2^k}$, QFT$^\dagger$, measurement</td></tr>
+        <tr><td><strong>Modular arithmetic</strong></td><td>Controlled-$M_2$, controlled-$M_4$</td><td>Controlled-SWAPs (Fredkin gates)</td></tr>
+        <tr><td><strong>Three-qubit gates</strong></td><td>Fredkin, Toffoli</td><td>CNOTs + single-qubit gates</td></tr>
+        <tr><td><strong>Two-qubit gates</strong></td><td>SWAP, CNOT</td><td>Native CNOT (or CZ)</td></tr>
+        <tr><td><strong>Hardware</strong></td><td>Native gates on physical qubits</td><td>Microwave pulses, calibration</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="w-foot">Each layer compiles into a longer sequence in the layer below. The compiler's job is to make this expansion as efficient as possible.</div>
+</div>
+
+<p>The transition from the top layer to the bottom is what circuit compilation does. And the difficulty of getting hundreds of two-qubit gates to all execute correctly without errors is exactly why error correction is needed for any real-world Shor's algorithm run.</p>
+
+<h3>The full circuit for $N = 15$, $a = 2$</h3>
+
+<p>Here is the complete order-finding circuit. We have 8 counting qubits at the top, all initialized to $|0\rangle$, and 4 work qubits at the bottom, initialized to $|1\rangle = |0001\rangle$. Hadamard gates are applied to each counting qubit, then controlled-$M_2$ from the first counting qubit, controlled-$M_4$ from the second, and nothing from the rest (since $M_1$ does nothing). Finally, the inverse QFT and measurement.</p>
+
+<p style="font-size:.92rem;color:var(--text-mid);font-style:italic"><strong>Click any gate</strong> in the diagram below to learn what it does and why it is there.</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Interactive circuit: factoring 15 with $a = 2$</span></div>
+  <div class="w-body" style="overflow-x:auto;padding:24px 16px">
+    <svg id="icircSvg" class="icirc-svg" viewBox="0 0 760 480" style="width:100%;min-width:600px;height:auto;font-family:system-ui,sans-serif">
+      <text x="14" y="55" font-size="10" font-weight="600" fill="#5e5485">$c_0$ |0⟩</text>
+      <text x="14" y="85" font-size="10" font-weight="600" fill="#5e5485">$c_1$ |0⟩</text>
+      <text x="14" y="115" font-size="10" font-weight="600" fill="#5e5485">$c_2$ |0⟩</text>
+      <text x="14" y="145" font-size="10" font-weight="600" fill="#5e5485">$c_3$ |0⟩</text>
+      <text x="14" y="175" font-size="10" font-weight="600" fill="#5e5485">$c_4$ |0⟩</text>
+      <text x="14" y="205" font-size="10" font-weight="600" fill="#5e5485">$c_5$ |0⟩</text>
+      <text x="14" y="235" font-size="10" font-weight="600" fill="#5e5485">$c_6$ |0⟩</text>
+      <text x="14" y="265" font-size="10" font-weight="600" fill="#5e5485">$c_7$ |0⟩</text>
+      
+      <text x="14" y="335" font-size="10" font-weight="600" fill="#5e5485">$t_0$ |1⟩</text>
+      <text x="14" y="365" font-size="10" font-weight="600" fill="#5e5485">$t_1$ |0⟩</text>
+      <text x="14" y="395" font-size="10" font-weight="600" fill="#5e5485">$t_2$ |0⟩</text>
+      <text x="14" y="425" font-size="10" font-weight="600" fill="#5e5485">$t_3$ |0⟩</text>
+      
+      <line x1="60" y1="50" x2="730" y2="50" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="80" x2="730" y2="80" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="110" x2="730" y2="110" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="140" x2="730" y2="140" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="170" x2="730" y2="170" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="200" x2="730" y2="200" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="230" x2="730" y2="230" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="260" x2="730" y2="260" stroke="#1a0e4b" stroke-width="1"/>
+      
+      <line x1="60" y1="330" x2="730" y2="330" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="360" x2="730" y2="360" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="390" x2="730" y2="390" stroke="#1a0e4b" stroke-width="1"/>
+      <line x1="60" y1="420" x2="730" y2="420" stroke="#1a0e4b" stroke-width="1"/>
+      
+      <!-- Hadamard gates - clickable group -->
+      <g class="gate-grp" data-info="hadamard">
+        <rect x="80" y="38" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="55" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="80" y="68" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="85" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="80" y="98" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="115" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="80" y="128" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="145" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="80" y="158" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="175" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="80" y="188" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="205" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="80" y="218" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="235" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+        <rect x="80" y="248" width="22" height="24" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/><text x="91" y="265" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">H</text>
+      </g>
+      
+      <!-- X gate - clickable -->
+      <g class="gate-grp" data-info="xgate">
+        <rect x="80" y="318" width="22" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <text x="91" y="335" text-anchor="middle" font-size="10" font-weight="700" fill="#1a0e4b">X</text>
+      </g>
+      <text x="91" y="465" text-anchor="middle" font-size="9" fill="#5e5485">init |1⟩</text>
+      
+      <!-- Controlled M_2 - clickable -->
+      <g class="gate-grp" data-info="cm2">
+        <circle cx="160" cy="50" r="4" fill="#7c3aed"/>
+        <line x1="160" y1="50" x2="160" y2="345" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="140" y="320" width="40" height="105" rx="4" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="160" y="362" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">$M_2$</text>
+        <text x="160" y="380" text-anchor="middle" font-size="8" fill="#7c3aed">(swap×3)</text>
+      </g>
+      <text x="160" y="465" text-anchor="middle" font-size="9" fill="#5e5485">$c_0$ controls $M_2$</text>
+      
+      <!-- Controlled M_4 - clickable -->
+      <g class="gate-grp" data-info="cm4">
+        <circle cx="240" cy="80" r="4" fill="#7c3aed"/>
+        <line x1="240" y1="80" x2="240" y2="345" stroke="#7c3aed" stroke-width="1.2"/>
+        <rect x="220" y="320" width="40" height="105" rx="4" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="240" y="362" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">$M_4$</text>
+        <text x="240" y="380" text-anchor="middle" font-size="8" fill="#7c3aed">(swap×2)</text>
+      </g>
+      <text x="240" y="465" text-anchor="middle" font-size="9" fill="#5e5485">$c_1$ controls $M_4$</text>
+      
+      <!-- Identity placeholder - clickable -->
+      <g class="gate-grp" data-info="identity">
+        <rect x="290" y="100" width="180" height="180" rx="6" fill="white" fill-opacity="0" stroke="#9590ac" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="380" y="190" text-anchor="middle" font-size="10" fill="#9590ac" font-style="italic">$c_2$ to $c_7$ control $M_1$ = Identity</text>
+        <text x="380" y="205" text-anchor="middle" font-size="10" fill="#9590ac" font-style="italic">(no gates needed)</text>
+      </g>
+      
+      <!-- Inverse QFT - clickable -->
+      <g class="gate-grp" data-info="iqft">
+        <rect x="510" y="40" width="100" height="235" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+        <text x="560" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">QFT</text>
+        <text x="560" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">⁻¹</text>
+      </g>
+      <text x="560" y="465" text-anchor="middle" font-size="9" fill="#5e5485">Inverse QFT</text>
+      
+      <!-- Measurements - clickable -->
+      <g class="gate-grp" data-info="measure">
+        <rect x="640" y="38" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <path d="M 644 58 A 8 8 0 0 1 660 58" fill="none" stroke="#1a0e4b" stroke-width="1"/>
+        <line x1="652" y1="58" x2="662" y2="46" stroke="#1a0e4b" stroke-width="1"/>
+        <rect x="640" y="68" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <path d="M 644 88 A 8 8 0 0 1 660 88" fill="none" stroke="#1a0e4b" stroke-width="1"/>
+        <line x1="652" y1="88" x2="662" y2="76" stroke="#1a0e4b" stroke-width="1"/>
+        <rect x="640" y="98" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <path d="M 644 118 A 8 8 0 0 1 660 118" fill="none" stroke="#1a0e4b" stroke-width="1"/>
+        <line x1="652" y1="118" x2="662" y2="106" stroke="#1a0e4b" stroke-width="1"/>
+        <rect x="640" y="128" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <rect x="640" y="158" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <rect x="640" y="188" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <rect x="640" y="218" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+        <rect x="640" y="248" width="24" height="24" rx="3" fill="white" stroke="#1a0e4b" stroke-width="1.2"/>
+      </g>
+      <text x="652" y="465" text-anchor="middle" font-size="9" fill="#5e5485">Measure 8 bits → $y$</text>
+      
+      <line x1="664" y1="50" x2="710" y2="50" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="664" y1="80" x2="710" y2="80" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="664" y1="110" x2="710" y2="110" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="664" y1="140" x2="710" y2="140" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="664" y1="170" x2="710" y2="170" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="664" y1="200" x2="710" y2="200" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="664" y1="230" x2="710" y2="230" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="664" y1="260" x2="710" y2="260" stroke="#1a0e4b" stroke-width="0.8" stroke-dasharray="3,2"/>
+      
+      <text x="715" y="160" font-size="11" font-weight="700" fill="#7c3aed">$y$</text>
+    </svg>
+  </div>
+  <div id="icircInfo" class="icirc-info">
+    <div class="icirc-info-title">Click a gate to explore</div>
+    <div class="icirc-info-body icirc-prompt">Tap or click any gate in the circuit above to see what it does, why it is there, and how it transforms the quantum state at that point.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const explanations = {
+    hadamard: {
+      title: "Hadamard gates (H) — Stage 1",
+      body: `<p>The Hadamard gate is the workhorse of quantum computing. Applied to a qubit in state $|0\\rangle$, it produces an equal superposition: $\\frac{1}{\\sqrt{2}}(|0\\rangle + |1\\rangle)$. Half-zero, half-one.</p>
+<p>Here we apply <strong>one Hadamard to each of the 8 counting qubits</strong>. This puts the entire counting register into a uniform superposition over all $2^8 = 256$ possible bit strings at once. After this stage, the counting register is simultaneously in every state from $|0\\rangle$ to $|255\\rangle$.</p>
+<p>This is what lets the circuit evaluate $a^x \\bmod N$ for all 256 values of $x$ in a single pass. Without superposition, we would need 256 separate runs.</p>`
+    },
+    xgate: {
+      title: "X gate — Initialize work register to $|1\\rangle$",
+      body: `<p>The X gate is the quantum equivalent of a classical NOT gate. It flips $|0\\rangle$ to $|1\\rangle$ (and vice versa).</p>
+<p>By default, all qubits are initialized to $|0\\rangle$. But the algorithm needs the work register to start in state $|1\\rangle = |0001\\rangle$. So we apply X to qubit $t_0$ to flip it from 0 to 1, leaving the other work qubits at 0. The combined work register is now $|0001\\rangle$ which represents the integer 1.</p>
+<p>Why $|1\\rangle$? Because $|1\\rangle$ is a uniform superposition of all the eigenvectors of $M_a$, which is exactly what phase estimation needs.</p>`
+    },
+    cm2: {
+      title: "Controlled-$M_2$ — Multiply by 2 mod 15",
+      body: `<p>This is a <strong>controlled gate</strong>: the dot on $c_0$ is the control, and the box on the work register is the operation. The rule is simple: if $c_0$ is in state $|1\\rangle$, apply $M_2$ to the work register. If $c_0$ is in state $|0\\rangle$, do nothing.</p>
+<p>Because $c_0$ is in superposition (it is half $|0\\rangle$, half $|1\\rangle$ after the Hadamards), this gate <em>entangles</em> the counting register with the work register. The two halves of $c_0$'s superposition now correspond to different work-register states.</p>
+<p>$M_2$ itself multiplies whatever value is in the work register by 2 mod 15. Implemented physically as three SWAP gates between the four work qubits, since the operation $|q_3 q_2 q_1 q_0\\rangle \\to |q_2 q_1 q_0 q_3\\rangle$ happens to equal multiplication by 2 mod 15.</p>`
+    },
+    cm4: {
+      title: "Controlled-$M_4$ — Multiply by 4 mod 15",
+      body: `<p>Same idea as before, but now controlled by $c_1$ and applying $M_4$ instead of $M_2$. If $c_1 = |1\\rangle$, multiply the work register by 4 mod 15.</p>
+<p>Why $M_4$ here? Because phase estimation requires applying $M_a^{2^k}$ controlled by the $k$-th counting qubit. So $c_0$ controls $M_a^1 = M_2$, $c_1$ controls $M_a^2 = M_4$, $c_2$ controls $M_a^4 = M_{16 \\bmod 15} = M_1$, and so on.</p>
+<p>$M_4$ is implemented with just two SWAP gates: swap $q_0 \\leftrightarrow q_2$ and $q_1 \\leftrightarrow q_3$. This corresponds to the bit permutation $|q_3 q_2 q_1 q_0\\rangle \\to |q_1 q_0 q_3 q_2\\rangle$.</p>`
+    },
+    identity: {
+      title: "$M_1$ — Identity (does nothing)",
+      body: `<p>Counting qubits $c_2$ through $c_7$ would normally control $M_a^{2^2}, M_a^{2^3}, \\ldots, M_a^{2^7}$. But for $a = 2$ and $N = 15$, all of these reduce to $M_1$, the identity operator.</p>
+<p>Why? Because $2^4 \\bmod 15 = 16 \\bmod 15 = 1$. So $M_2^4 = M_1$. And then $M_1^k = M_1$ for any $k$. In symbols: $2^{2^k} \\bmod 15 = [2, 4, 1, 1, 1, 1, 1, 1]$ for $k = 0, 1, \\ldots, 7$.</p>
+<p>Since $M_1$ doesn't change anything, we just don't include any gates. This is a happy accident specific to $N = 15$ and $a = 2$ — for larger numbers we would need to actually implement these higher-power gates.</p>`
+    },
+    iqft: {
+      title: "Inverse Quantum Fourier Transform",
+      body: `<p>This is the magic ingredient. The inverse QFT takes the counting register, which after the controlled gates contains a complicated superposition encoding the period $r$, and converts that periodicity into <strong>sharp peaks</strong> at predictable locations.</p>
+<p>Internally, the inverse QFT is itself a sequence of Hadamard gates and controlled-phase gates between the 8 counting qubits. We've drawn it as a single box for clarity, but in practice it is about $\\frac{m(m+1)}{2} = 36$ gates for our 8-qubit register.</p>
+<p>The interference pattern produced by the QFT means that after this stage, the counting register's amplitude is concentrated on values that are multiples of $Q/r = 256/4 = 64$. So measurement is overwhelmingly likely to return one of $\\{0, 64, 128, 192\\}$.</p>
+<p>The QFT is the only step that fundamentally requires a quantum computer. Everything else has a classical analog.</p>`
+    },
+    measure: {
+      title: "Measurement",
+      body: `<p>Each measurement gate collapses one counting qubit into either $|0\\rangle$ or $|1\\rangle$, returning a classical bit. Together, all 8 measurements give us an 8-bit classical integer $y$.</p>
+<p>Because of the QFT-engineered interference, $y$ is almost certain to be one of $\\{0, 64, 128, 192\\}$, each with about 25% probability. From $y$ we compute $y/Q = y/256$, then use the continued fractions algorithm to find a fraction $k/r$ close to it. The denominator $r$ is the period we wanted.</p>
+<p>For $y = 64$: $64/256 = 1/4$, so $r = 4$. ✓<br>For $y = 192$: $192/256 = 3/4$, so $r = 4$. ✓<br>For $y = 128$: $128/256 = 1/2$, so $r = 2$ (a divisor of the true period).<br>For $y = 0$: gives no useful information; just rerun the circuit.</p>`
+    }
+  };
+  
+  const svg = document.getElementById('icircSvg');
+  const info = document.getElementById('icircInfo');
+  if(!svg || !info) return;
+  
+  function showInfo(key){
+    const e = explanations[key];
+    if(!e) return;
+    info.innerHTML = '<div class="icirc-info-title">'+e.title+'</div><div class="icirc-info-body">'+e.body+'</div>';
+    if(typeof renderMathInElement === 'function'){
+      renderMathInElement(info,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+    }
+  }
+  
+  svg.querySelectorAll('.gate-grp').forEach(grp => {
+    grp.addEventListener('click', () => {
+      svg.querySelectorAll('.gate-grp').forEach(g => g.classList.remove('active'));
+      grp.classList.add('active');
+      showInfo(grp.getAttribute('data-info'));
+    });
+  });
+})();
+</script>
+
+<h3>Tracing the state evolution</h3>
+
+<p>Now let's trace what happens to the quantum state at each stage of this circuit. This is the kind of analysis you can only really do on a simulator, since on real hardware measurement collapses everything. But it's exactly what makes the algorithm intuitive.</p>
+
+<p><strong>Stage 1: After the X gate on $t_0$.</strong> The work register is now in state $|1\rangle = |0001\rangle$. The counting register is still all zeros. The full state is:</p>
+
+<div class="math-block">$$|0\rangle_{\text{count}} \otimes |1\rangle_{\text{work}}$$</div>
+
+<p><strong>Stage 2: After all 8 Hadamards.</strong> The counting register is now in a uniform superposition of all $Q = 256$ possible values:</p>
+
+<div class="math-block">$$\frac{1}{\sqrt{256}} \sum_{x=0}^{255} |x\rangle_{\text{count}} \otimes |1\rangle_{\text{work}}$$</div>
+
+<p><strong>Stage 3: After the controlled modular exponentiation.</strong> Each value of $x$ in the counting register gets paired with $2^x \bmod 15$ in the work register. Because of the periodicity, the work register only ever holds one of four values: $\{1, 2, 4, 8\}$. The state becomes entangled:</p>
+
+<div class="math-block">$$\frac{1}{\sqrt{256}} \sum_{x=0}^{255} |x\rangle_{\text{count}} \otimes |2^x \bmod 15\rangle_{\text{work}}$$</div>
+
+<p><strong>Stage 4: After the inverse QFT on the counting register.</strong> The QFT detects the periodicity. Almost all of the amplitude piles up on values of the counting register that are multiples of $Q/r = 256/4 = 64$. So the counting register is concentrated on $\{0, 64, 128, 192\}$, each with probability about $1/4$.</p>
+
+<p><strong>Stage 5: Measurement.</strong> Reading out the counting register gives one of those four values, chosen at random. In binary (8 bits), they are:</p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Theoretical measurement outcomes (1024 shots, ideal simulator)</span></div>
+  <div class="w-body">
+    <table class="mt" style="font-size:.78rem">
+      <thead><tr><th>Bitstring</th><th>Decimal $y$</th><th>Phase $y/Q$</th><th>Closest fraction</th><th>Recovered $r$</th></tr></thead>
+      <tbody>
+        <tr><td>$00000000$</td><td>$0$</td><td>$0/256 = 0.00$</td><td>$0/1$</td><td style="color:var(--text-light)">$1$ (fail)</td></tr>
+        <tr><td>$01000000$</td><td>$64$</td><td>$64/256 = 0.25$</td><td>$1/4$</td><td class="hl">$4$</td></tr>
+        <tr><td>$10000000$</td><td>$128$</td><td>$128/256 = 0.50$</td><td>$1/2$</td><td>$2$ (divisor)</td></tr>
+        <tr><td>$11000000$</td><td>$192$</td><td>$192/256 = 0.75$</td><td>$3/4$</td><td class="hl">$4$</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="w-foot">Each outcome appears with roughly equal probability (~25%). Two of the four outcomes directly yield $r = 4$.</div>
+</div>
+
+<p>Two of the four possible outcomes ($y = 64$ and $y = 192$) directly give us $r = 4$. The outcome $y = 128$ gives a divisor of the true period. The outcome $y = 0$ gives no information. So with about 50% probability per shot, a single measurement reveals the period. A few independent shots make success near-certain.</p>
+
+<h3>Completing the algorithm</h3>
+
+<p>Once we have $r = 4$, the rest is classical arithmetic. We compute $a^{r/2} = 2^2 = 4$, then:</p>
+
+<div class="math-block">$$\gcd(4 - 1, 15) = \gcd(3, 15) = \textcolor{#7c3aed}{\mathbf{3}}$$
+$$\gcd(4 + 1, 15) = \gcd(5, 15) = \textcolor{#7c3aed}{\mathbf{5}}$$</div>
+
+<p>And we have factored 15 = 3 × 5. The quantum circuit did the hard part (finding the period); the classical computer did the easy part (extracting the factors).</p>
 
 <h2 id="s-qft">The QFT measurement output</h2>
 <p>After the QFT, measurement probabilities spike at multiples of $Q/r$, where $Q$ is the register size. For $Q = 16$ and $r = 4$, spikes appear at $0, 4, 8, 12$. Hover over the bars to see probabilities:</p>
@@ -392,7 +1265,7 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 
 <p>A typical RSA key uses $N$ with 2048 bits (about 617 decimal digits). The best classical factoring algorithms would take roughly $10^{23}$ years to crack such a key. Shor's algorithm reduces this to a matter of hours on a sufficiently powerful quantum computer.</p>
 
-<p>This doesn't mean RSA is broken <em>today</em>. Current quantum computers have at most a few thousand noisy qubits. Factoring a 2048-bit number with Shor's algorithm would require an estimated 20 million physical qubits with error correction. But the threat is taken seriously enough that organizations like NIST have already standardized <strong>post-quantum cryptographic algorithms</strong> designed to resist quantum attacks. The transition to quantum-safe cryptography is underway.</p>
+<p>This doesn't mean RSA is broken <em>today</em>. Current quantum computers have at most a few thousand noisy qubits. Factoring a 2048-bit number with Shor's algorithm would require an estimated 20 million physical qubits with error correction.<sup class="cite"><a href="#ref-gidney">4</a></sup> But the threat is taken seriously enough that organizations like NIST have already standardized <strong>post-quantum cryptographic algorithms</strong> designed to resist quantum attacks.<sup class="cite"><a href="#ref-nist">5</a></sup> The transition to quantum-safe cryptography is underway.</p>
 
 <div class="review rv" id="r5">
   <div class="review-head"><span>Check your understanding</span></div>
@@ -413,7 +1286,7 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 </div>
 
 <h3>The speed difference</h3>
-<p>The best classical factoring algorithm (the general number field sieve) runs in sub-exponential time. Shor's runs in polynomial time: $O(n^3)$ for an $n$-bit number. For a 2048-bit RSA key, that is the difference between roughly $10^{23}$ years classically and a few hours on a sufficiently large quantum computer.</p>
+<p>The best classical factoring algorithm (the general number field sieve) runs in sub-exponential time. Shor's runs in polynomial time: $O(n^3)$ for an $n$-bit number.<sup class="cite"><a href="#ref-shor">2</a></sup> For a 2048-bit RSA key, that is the difference between roughly $10^{23}$ years classically and a few hours on a sufficiently large quantum computer.</p>
 
 <div class="review rv" id="r4">
   <div class="review-head"><span>Check your understanding</span></div>
@@ -445,6 +1318,53 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
     </div>
   </div>
 </div>
+
+<h2 id="s-errors">Real qubits have errors</h2>
+
+<p>Everything we've shown so far assumes <strong>perfect qubits</strong>. The simulator uses ideal quantum operations: every Hadamard gate is exactly a Hadamard, every controlled-$M_2$ does exactly what it should, and every measurement returns a result drawn from the true probability distribution. Under those conditions, the circuit factors 15 reliably.</p>
+
+<p>Real qubits don't behave that way. Today's quantum hardware suffers from several kinds of errors:</p>
+
+<p><strong>Decoherence.</strong> A qubit holds quantum information for only a brief moment before unwanted interactions with its environment scramble its state. On current hardware, this happens within microseconds. The longer your circuit takes to run, the more decoherence accumulates.</p>
+
+<p><strong>Gate errors.</strong> Each quantum gate is implemented by a physical pulse (microwave, laser, or otherwise) applied to the qubits. Pulses are never perfectly calibrated. Single-qubit gates have error rates around 0.01% on the best hardware, and two-qubit gates are roughly an order of magnitude worse. These errors compound: a circuit with thousands of gates accumulates substantial error.</p>
+
+<p><strong>Measurement errors.</strong> Even reading out the final state introduces noise. A qubit that should measure as $0$ will sometimes read out as $1$ and vice versa.</p>
+
+<h3>What this looks like in practice</h3>
+
+<p>Recall our circuit for $N = 15$, $a = 2$. On an ideal simulator, only four bitstrings appear with equal 25% probability: $00000000$, $01000000$, $10000000$, and $11000000$. Run the same circuit on real IBM hardware and the result looks more like this:<sup class="cite"><a href="#ref-ibm">3</a></sup></p>
+
+<div class="widget rv">
+  <div class="w-head"><div class="w-dot" style="background:var(--purple)"></div><div class="w-dot" style="background:var(--purple-mid)"></div><div class="w-dot" style="background:var(--purple-light)"></div><span class="w-title">Ideal vs. noisy hardware (illustrative)</span></div>
+  <div class="w-body">
+    <table class="mt" style="font-size:.78rem">
+      <thead><tr><th>Bitstring</th><th>Ideal simulator</th><th>Real hardware</th></tr></thead>
+      <tbody>
+        <tr><td>$00000000$ (correct)</td><td class="hl">~25%</td><td>~6%</td></tr>
+        <tr><td>$01000000$ (correct)</td><td class="hl">~25%</td><td>~4%</td></tr>
+        <tr><td>$10000000$ (correct)</td><td class="hl">~25%</td><td>~4%</td></tr>
+        <tr><td>$11000000$ (correct)</td><td class="hl">~25%</td><td>~4%</td></tr>
+        <tr><td>All other 252 bitstrings</td><td>0%</td><td>~82% spread out</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="w-foot">Noise spreads probability mass across many incorrect outcomes. The signal is still detectable here, but for longer circuits it disappears entirely.</div>
+</div>
+
+<p>The four correct outcomes are still the four most common, so we can recover the answer with statistical filtering. But this only works because the circuit is small. For larger numbers, the circuit depth grows, more gates means more compounded error, and eventually the signal drowns in the noise. A 2048-bit RSA key would require a circuit so deep that with current error rates the answer would be completely undetectable.</p>
+
+<h3>Quantum error correction</h3>
+
+<p>The path to factoring real cryptographic numbers runs through <strong>quantum error correction</strong>. The idea is to encode each <em>logical qubit</em> (the kind we used above) into many <em>physical qubits</em>, in such a way that errors on the physical qubits can be detected and corrected without disturbing the logical state. This is how classical computers achieve essentially zero error rates: by using error-correcting codes on noisy underlying hardware.</p>
+
+<p>Quantum error correction is harder than classical error correction. Quantum information can't be copied (the no-cloning theorem),<sup class="cite"><a href="#ref-nocloning">6</a></sup> and measurement collapses superposition. But schemes do exist (the <em>surface code</em> is the most studied) that can suppress errors arbitrarily, given enough physical qubits per logical qubit.<sup class="cite"><a href="#ref-fowler">7</a></sup></p>
+
+<p>The cost is enormous. Current estimates suggest that a single logical qubit reliable enough to run Shor's algorithm on a 2048-bit number would need about <strong>1,000 physical qubits</strong>. The full algorithm needs about <strong>20 million physical qubits</strong> running for around <strong>8 hours</strong>.<sup class="cite"><a href="#ref-gidney">4</a></sup> Today's largest quantum processors have a few thousand physical qubits with high enough error rates that error correction barely begins to work.</p>
+
+<p>This is the great challenge facing quantum computing today. The algorithm is solved. The mathematics is understood. What remains is a hardware engineering problem of staggering difficulty: building a fault-tolerant quantum computer with millions of well-controlled qubits. Progress has been steady but slow. When (or if) we get there, the cryptographic infrastructure of the internet will have to be rebuilt around quantum-safe alternatives.</p>
+
+<p>The full story of quantum factoring, then, has three acts. <strong>The mathematics</strong> (period-finding via the QFT) was settled by Shor in 1994. <strong>The circuit</strong> (the gates we built above) is well-understood and routinely simulated. <strong>The hardware</strong>, including the towers of error correction needed to make it work at scale, is what we're still building. We've shown you the first two acts. The third is being written right now in research labs around the world.</p>
 
 <h2 id="s-summary">Looking back</h2>
 
@@ -483,7 +1403,23 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 
 </article>
 
-<div style="max-width:780px;margin:0 auto;padding:40px 20px 0;border-top:1px solid var(--border)">
+<div class="refs" style="max-width:780px;margin:0 auto;padding-left:20px;padding-right:20px">
+  <div class="refs-title">References</div>
+  <ol>
+    <li id="ref-aaronson">Scott Aaronson. <em>Shor, I'll do it.</em> Shtetl-Optimized blog post (2007). <a href="https://scottaaronson.blog/?p=208">scottaaronson.blog/?p=208</a></li>
+    <li id="ref-shor">Peter W. Shor. <em>Polynomial-time algorithms for prime factorization and discrete logarithms on a quantum computer.</em> SIAM Journal on Computing, 26(5):1484–1509 (1997). Original conference version: <em>Algorithms for quantum computation: discrete logarithms and factoring</em>, Proc. 35th FOCS (1994). <a href="https://epubs.siam.org/doi/abs/10.1137/S0036144598347011">DOI</a></li>
+    <li id="ref-ibm">IBM Quantum. <em>Shor's algorithm</em> tutorial. (2025). <a href="https://quantum.cloud.ibm.com/docs/en/tutorials/shors-algorithm">quantum.cloud.ibm.com</a> — source for the M_2/M_4 swap-gate constructions, the 12-qubit circuit for $N=15$, the m=2n register sizing, the simulated bitstring distribution, and the transpiled depth of 187 two-qubit gates on ibm_marrakesh.</li>
+    <li id="ref-gidney">Craig Gidney and Martin Ekerå. <em>How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits.</em> Quantum, 5:433 (2021). <a href="https://doi.org/10.22331/q-2021-04-15-433">DOI</a></li>
+    <li id="ref-nist">National Institute of Standards and Technology (NIST). <em>Post-Quantum Cryptography Standardization</em>. Final standards FIPS 203 (ML-KEM), FIPS 204 (ML-DSA), FIPS 205 (SLH-DSA), published August 2024. <a href="https://csrc.nist.gov/projects/post-quantum-cryptography">csrc.nist.gov/projects/post-quantum-cryptography</a></li>
+    <li id="ref-nocloning">William K. Wootters and Wojciech H. Zurek. <em>A single quantum cannot be cloned.</em> Nature 299, 802–803 (1982). <a href="https://www.nature.com/articles/299802a0">DOI</a></li>
+    <li id="ref-fowler">Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. <em>Surface codes: Towards practical large-scale quantum computation.</em> Physical Review A 86, 032324 (2012). <a href="https://journals.aps.org/pra/abstract/10.1103/PhysRevA.86.032324">DOI</a></li>
+    <li id="ref-vandersypen">Lieven M. K. Vandersypen et al. <em>Experimental realization of Shor's quantum factoring algorithm using nuclear magnetic resonance.</em> Nature 414, 883–887 (2001). <a href="https://www.nature.com/articles/414883a">DOI</a> — the first demonstration of Shor's algorithm, factoring 15 on a 7-qubit NMR system.</li>
+    <li id="ref-cirq">Google Quantum AI. <em>Shor's algorithm</em> tutorial in Cirq. <a href="https://quantumai.google/cirq/experiments/shor">quantumai.google/cirq/experiments/shor</a></li>
+    <li id="ref-gidney-blog">Craig Gidney. <em>Shor's Quantum Factoring Algorithm.</em> algassert.com (2017). <a href="https://algassert.com/post/1718">algassert.com/post/1718</a></li>
+  </ol>
+</div>
+
+<div style="max-width:780px;margin:0 auto;padding:40px 20px 0">
   <p style="font-family:var(--sans);font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--purple);margin-bottom:16px">Further reading</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:.88rem;line-height:1.6">
     <a href="https://quantum.country/qcvc" style="display:block;padding:16px 20px;background:var(--code-bg);border:1px solid var(--border-light);border-radius:10px;color:var(--text-body);text-decoration:none;transition:border-color .15s">
@@ -503,7 +1439,7 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
       <span style="color:var(--text-mid);font-size:.82rem">Steven Ruppert et al. A JavaScript simulator that visualizes every stage of the algorithm.</span>
     </a>
   </div>
-  <p style="font-size:.82rem;color:var(--text-light);margin-top:20px;font-style:italic;line-height:1.6">Peter Shor, "Algorithms for quantum computation: discrete logarithms and factoring" (1994). Also: Nielsen and Chuang, <em>Quantum Computation and Quantum Information</em>, the standard textbook.</p>
+  <p style="font-size:.82rem;color:var(--text-light);margin-top:20px;font-style:italic;line-height:1.6">For a comprehensive textbook treatment, see Nielsen and Chuang, <em>Quantum Computation and Quantum Information</em>.</p>
 </div>
 
 <footer>Shor's Algorithm for the Very Curious</footer>
@@ -512,8 +1448,66 @@ footer{text-align:center;padding:40px;font-size:.75rem;color:var(--text-light);f
 document.addEventListener('DOMContentLoaded',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})});
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')})},{threshold:.08});document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
 
+// ===== UNIFIED INTERACTIVE SUB-CIRCUIT HANDLER =====
+(function(){
+  const explanations = {
+    // M_2 three-SWAP diagram
+    swap1: {title: "SWAP $q_2 \\leftrightarrow q_3$ (first)", body: `<p>The first SWAP exchanges qubits $q_2$ and $q_3$. After this gate, what was in qubit position 3 is now in position 2, and vice versa.</p><p>Why this specific pair first? Because we are implementing the bit rotation $|q_3 q_2 q_1 q_0\\rangle \\to |q_2 q_1 q_0 q_3\\rangle$. The trick is to do it as a chain of adjacent swaps, each one moving the original $q_3$ one position closer to the right.</p>`},
+    swap2: {title: "SWAP $q_1 \\leftrightarrow q_2$ (second)", body: `<p>After the first SWAP, $q_3$'s original value is sitting in position 2. This second SWAP moves it down to position 1. Each adjacent swap shuffles the bit one slot to the right.</p>`},
+    swap3: {title: "SWAP $q_0 \\leftrightarrow q_1$ (third)", body: `<p>The final SWAP places the original $q_3$ value into position 0, completing the rotation. The net effect of all three SWAPs is exactly the bit permutation $|q_3 q_2 q_1 q_0\\rangle \\to |q_2 q_1 q_0 q_3\\rangle$, which is multiplication by 2 mod 15.</p><p>You can verify: try $|0001\\rangle = 1$. After the chain you get $|0010\\rangle = 2$. ✓</p>`},
+    
+    // M_4 two-SWAP diagram
+    swap02: {title: "SWAP $q_0 \\leftrightarrow q_2$", body: `<p>This SWAP exchanges qubit positions 0 and 2. Together with the next SWAP, it implements the bit permutation needed for multiplication by 4 mod 15.</p>`},
+    swap13: {title: "SWAP $q_1 \\leftrightarrow q_3$", body: `<p>This SWAP exchanges positions 1 and 3. Notice that the two SWAPs in $M_4$ act on disjoint pairs of qubits — they can run in parallel on hardware that allows it. The net effect is $|q_3 q_2 q_1 q_0\\rangle \\to |q_1 q_0 q_3 q_2\\rangle$.</p><p>Try $|0001\\rangle = 1$: after the SWAPs you get $|0100\\rangle = 4$. ✓</p>`},
+    
+    // Inverse QFT decomposition
+    bitrev: {title: "Bit-reversal SWAPs", body: `<p>The QFT naturally produces its output in bit-reversed order. To get the standard order, we either swap the qubits at the end (forward QFT) or at the beginning (inverse QFT, as shown here).</p><p>For 4 qubits the bit reversal is $|q_0 q_1 q_2 q_3\\rangle \\to |q_3 q_2 q_1 q_0\\rangle$, which is two SWAPs: outer pair $(q_0, q_3)$ and inner pair $(q_1, q_2)$.</p>`},
+    iqfth: {title: "Hadamard gates (H)", body: `<p>Each qubit gets exactly one Hadamard somewhere in the QFT. The Hadamard is what produces interference: it converts $|0\\rangle$ and $|1\\rangle$ into superpositions whose phases will then combine with the controlled rotations to encode the frequency information.</p><p>Without the Hadamards there would be no interference and no peak in the output distribution.</p>`},
+    cphase: {title: "Controlled phase rotations $R_k^\\dagger$", body: `<p>Each $R_k^\\dagger$ applies a phase of $e^{-2\\pi i / 2^k}$ to the target qubit, but only when the control is $|1\\rangle$. The phase $R_k^\\dagger$ is exactly the phase needed to interfere with the corresponding bit of the QFT input.</p><p>The cascading pattern — every qubit receives controlled rotations from every other qubit — is what spreads the phase information so that interference reveals the frequencies of the original signal.</p><p>This is the only step that fundamentally distinguishes the QFT from a classical FFT: classical algorithms can compute amplitudes but cannot use them to build interference between universes.</p>`},
+    
+    // Controlled-M_2 → 3 Fredkins
+    fred1: {title: "First Fredkin: CSWAP on $(q_2, q_3)$", body: `<p>This Fredkin gate has $c_0$ as the control and operates on the pair $(q_2, q_3)$. When $c_0 = |1\\rangle$, it swaps those two qubits. When $c_0 = |0\\rangle$, it does nothing.</p><p>This is the controlled version of the first SWAP in the bare $M_2$. Because of the shared control, all three Fredkins act in unison: they either all fire (applying $M_2$) or all idle (applying identity).</p>`},
+    fred2: {title: "Second Fredkin: CSWAP on $(q_1, q_2)$", body: `<p>Same structure as the first, but now operating on $(q_1, q_2)$. Together with the first Fredkin, this moves $q_3$'s original value down by two positions whenever $c_0 = |1\\rangle$.</p>`},
+    fred3: {title: "Third Fredkin: CSWAP on $(q_0, q_1)$", body: `<p>The final Fredkin completes the controlled bit rotation. After all three: if $c_0 = |1\\rangle$ then the work register is multiplied by 2 mod 15; if $c_0 = |0\\rangle$ then nothing happened.</p><p>This entire structure of "control plus a chain of CSWAPs" is the standard way to build controlled modular multiplication on superconducting hardware.</p>`},
+    
+    // SWAP = 3 CNOTs
+    swapsymbol: {title: "SWAP gate (high-level symbol)", body: `<p>This is how we draw a SWAP at the algorithm level: two crosses connected by a line. It looks atomic. But underneath, the hardware does not actually have a SWAP gate as a primitive operation.</p><p>The hardware supports CNOT (and similar two-qubit entangling operations) plus arbitrary single-qubit rotations. A SWAP must be compiled into those primitives. The right side of the diagram shows how.</p>`},
+    cnot1: {title: "CNOT 1: control $q_a$, target $q_b$", body: `<p>The first CNOT flips $q_b$ if $q_a$ is $|1\\rangle$. After this gate, $q_b$ holds the parity $q_a \\oplus q_b$.</p><p>You can read the symbol as: the filled dot is the control, the circled-plus is the target.</p>`},
+    cnot2: {title: "CNOT 2: control $q_b$, target $q_a$ (reversed)", body: `<p>This CNOT reverses the roles. Now $q_b$ is the control and $q_a$ is the target. After this gate, $q_a$ holds the original value of $q_b$.</p><p>This is the key step in the SWAP construction: by reversing the direction, we copy $q_b$'s information into the $q_a$ position.</p>`},
+    cnot3: {title: "CNOT 3: control $q_a$, target $q_b$", body: `<p>The third CNOT cleans up. It flips $q_b$ once more, this time using the new value of $q_a$ (which holds the original $q_b$) as the control. Net effect: $q_b$ now holds the original $q_a$.</p><p>So after all three CNOTs: $q_a$ holds original $q_b$, and $q_b$ holds original $q_a$. The qubits have been swapped, using only CNOTs.</p>`},
+    
+    // Fredkin = 2 CNOTs + Toffoli
+    cswapsymbol: {title: "CSWAP / Fredkin (high-level symbol)", body: `<p>The controlled-SWAP, also called the Fredkin gate. Drawn as a control dot connected to two crossed targets. When the control is $|1\\rangle$, the two target qubits swap. When the control is $|0\\rangle$, they are left alone.</p><p>This is treated as one gate at the algorithm level, but on hardware it must be broken down further.</p>`},
+    cnotpre: {title: "Pre-CNOT (control $q_b$, target $q_a$)", body: `<p>The first CNOT in the Fredkin decomposition. It copies parity information from $q_b$ into $q_a$, setting up for the conditional swap that the Toffoli will perform.</p>`},
+    toffoli: {title: "Toffoli gate (CCNOT)", body: `<p>The Toffoli gate has <strong>two controls</strong> and one target. It flips the target if and only if both controls are $|1\\rangle$.</p><p>This is where the conditional logic lives in the Fredkin decomposition. The Toffoli only fires when the original control $c$ is $|1\\rangle$ AND the parity bit (now in $q_a$) is $|1\\rangle$, which is exactly the condition for the swap to happen.</p><p>The Toffoli itself is not a hardware primitive on most quantum computers. It compiles further into about 6 CNOTs plus single-qubit gates.</p>`},
+    cnotpost: {title: "Post-CNOT (control $q_b$, target $q_a$)", body: `<p>The final CNOT undoes the first one's parity copy, restoring $q_a$ to its correct value. The Fredkin is now complete.</p><p>Notice the structure: a CNOT, then a Toffoli, then the same CNOT again. This "sandwich" pattern is common in quantum circuit decompositions — the outer gates set up and clean up an intermediate state for the central computation.</p>`},
+  };
+  
+  function attachHandlers(svg) {
+    const icid = svg.getAttribute('data-icid');
+    const info = document.querySelector('[data-icinfo-for="' + icid + '"]');
+    if(!info) return;
+    
+    svg.querySelectorAll('.ic-grp').forEach(grp => {
+      grp.addEventListener('click', () => {
+        svg.querySelectorAll('.ic-grp').forEach(g => g.classList.remove('active'));
+        grp.classList.add('active');
+        const key = grp.getAttribute('data-info');
+        const e = explanations[key];
+        if(!e) return;
+        info.innerHTML = '<div class="ic-info-title">' + e.title + '</div><div class="ic-info-body">' + e.body + '</div>';
+        if(typeof renderMathInElement === 'function') {
+          renderMathInElement(info, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}], throwOnError:false});
+        }
+      });
+    });
+  }
+  
+  document.querySelectorAll('.ic-svg').forEach(attachHandlers);
+})();
+
 // Sidebar active section tracking
-const sectionIds=['s-why','s-key','s-example','s-explore','s-cycle','s-quantum','s-phase','s-qft','s-rsa','s-full','s-sim','s-summary'];
+const sectionIds=['s-why','s-key','s-example','s-explore','s-cycle','s-quantum','s-phase','s-circuit','s-qft','s-rsa','s-full','s-sim','s-errors','s-summary'];
 const sidebarLinks=document.querySelectorAll('.sidebar-link');
 function updateSidebar(){
   let current='s-why';
@@ -861,10 +1855,10 @@ const S = {
     const foundR=bestD;
     
     const g=this.gcd(measured,Q);
-    this.log('<div class="math-block">$Q = '+Q+'$<br>$k \\cdot Q/r = '+measured+'$<br>$\\text{measured}/Q = '+measured+'/'+Q);
-    if(g>1)this.log(' = '+(measured/g)+'/'+(Q/g));
-    this.log('$<br>$\\text{period} = '+foundR+'$</div>');
-    this.remath(document.getElementById('simLog'));
+    let mathBlock = '<div class="math-block">$Q = '+Q+'$<br>$k \\cdot Q/r = '+measured+'$<br>$\\text{measured}/Q = '+measured+'/'+Q;
+    if(g>1) mathBlock += ' = '+(measured/g)+'/'+(Q/g);
+    mathBlock += '$<br>$\\text{period} = '+foundR+'$</div>';
+    this.log(mathBlock);
     
     this.log('<p>For some periods, there is a good chance that the period is divisible by $k$, in which case the fraction will be reduced so the denominator is equal to some fraction of the actual period. If the factors are reported wrong below, try running the algorithm again.</p>');
     
@@ -873,24 +1867,25 @@ const S = {
     // Check period
     let canProceed=true;
     
-    this.log('<ul style="list-style:none;padding:0;margin:8px 0 16px">');
+    let validationList = '<ul style="list-style:none;padding:0;margin:8px 0 16px">';
     if(foundR%2!==0){
-      this.log('<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>the period is even</strong>: $r = '+foundR+'$ is odd!</li>');
+      validationList += '<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>the period is even</strong>: $r = '+foundR+'$ is odd!</li>';
       canProceed=false;
     }else{
-      this.log('<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>the period is even</strong>: check!</li>');
+      validationList += '<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>the period is even</strong>: check!</li>';
     }
     
     if(canProceed){
       const aHalf=this.modpow(a,foundR/2,n);
       if(aHalf===n-1){
-        this.log('<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>$a^{r/2} \\bmod N$ is not equal to $N - 1$</strong>: it equals $'+(n-1)+'$!</li>');
+        validationList += '<li style="color:var(--red);margin-bottom:4px">&#10007; <strong>$a^{r/2} \\bmod N$ is not equal to $N - 1$</strong>: it equals $'+(n-1)+'$!</li>';
         canProceed=false;
       }else{
-        this.log('<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>$a^{r/2} \\bmod N$ is not equal to $N - 1$</strong>: $'+aHalf+' \\neq '+(n-1)+'$, check!</li>');
+        validationList += '<li style="color:var(--green);margin-bottom:4px">&#10003; <strong>$a^{r/2} \\bmod N$ is not equal to $N - 1$</strong>: $'+aHalf+' \\neq '+(n-1)+'$, check!</li>';
       }
     }
-    this.log('</ul>');
+    validationList += '</ul>';
+    this.log(validationList);
     
     if(!canProceed){
       this.log('<p style="color:var(--red);font-weight:600">Looks like this run didn\'t make the cut. Try a different $a$!</p>');
